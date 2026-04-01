@@ -5,6 +5,7 @@ import axios from 'axios'
 function ProductDetail() {
   const { id } = useParams()
   const [product, setProduct] = useState(null)
+  const [added, setAdded] = useState(false)
   const token = localStorage.getItem('token')
   const navigate = useNavigate()
 
@@ -16,7 +17,7 @@ function ProductDetail() {
 
   const addToCart = async () => {
     if (!token) {
-      alert('Debes iniciar sesión primero')
+      navigate('/login')
       return
     }
     try {
@@ -24,42 +25,72 @@ function ProductDetail() {
         { product_id: id, quantity: 1 },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      alert('¡Agregado al carrito!')
+      setAdded(true)
+      setTimeout(() => setAdded(false), 2000)
     } catch {
       alert('Error al agregar al carrito')
     }
   }
 
-  if (!product) return <p className="p-6 text-gray-400">Cargando producto...</p>
+  if (!product) return (
+    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <p className="text-gray-400">Cargando producto...</p>
+    </div>
+  )
 
   return (
-    <div className="max-w-3xl mx-auto p-6">
-      <button
-        onClick={() => navigate('/')}
-        className="text-blue-600 hover:underline mb-6 block"
-      >
-        ← Volver a productos
-      </button>
+    <div className="min-h-screen bg-gray-50 px-6 py-10">
+      <div className="max-w-4xl mx-auto">
 
-      <div className="flex flex-col sm:flex-row gap-8">
-        <img
-          src={product.image_url}
-          alt={product.name}
-          className="w-full sm:w-1/2 h-72 object-cover rounded-lg shadow"
-        />
-        <div className="flex flex-col justify-between">
-          <div>
-            <h1 className="text-2xl font-bold mb-2">{product.name}</h1>
-            <p className="text-gray-500 mb-4">{product.description}</p>
-            <p className="text-3xl font-bold text-blue-600 mb-2">${product.price}</p>
-            <p className="text-sm text-gray-400">Stock disponible: {product.stock}</p>
+        <button
+          onClick={() => navigate('/')}
+          className="text-sm text-gray-400 hover:text-gray-900 transition-colors mb-8 flex items-center gap-1"
+        >
+          ← Volver a productos
+        </button>
+
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="flex flex-col sm:flex-row">
+
+            <img
+              src={product.image_url}
+              alt={product.name}
+              className="w-full sm:w-1/2 h-80 object-cover"
+            />
+
+            <div className="p-8 flex flex-col justify-between w-full">
+              <div>
+                <h1 className="text-2xl font-bold text-gray-900 mb-3">{product.name}</h1>
+                <p className="text-gray-400 text-sm leading-relaxed mb-6">{product.description}</p>
+
+                <div className="flex items-center gap-4 mb-6">
+                  <span className="text-3xl font-bold text-gray-900">${product.price}</span>
+                  <span className={`text-sm px-3 py-1 rounded-full ${
+                    product.stock > 0
+                      ? 'bg-green-50 text-green-600'
+                      : 'bg-red-50 text-red-500'
+                  }`}>
+                    {product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock'}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                onClick={addToCart}
+                disabled={product.stock === 0}
+                className={`w-full py-3 rounded-xl text-sm font-medium transition-colors ${
+                  added
+                    ? 'bg-green-500 text-white'
+                    : product.stock === 0
+                    ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-900 text-white hover:bg-gray-700'
+                }`}
+              >
+                {added ? '✓ Agregado al carrito' : 'Agregar al carrito'}
+              </button>
+
+            </div>
           </div>
-          <button
-            onClick={addToCart}
-            className="mt-6 bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 font-semibold"
-          >
-            Agregar al carrito
-          </button>
         </div>
       </div>
     </div>

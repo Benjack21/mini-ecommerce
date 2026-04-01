@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import axios from 'axios'
 
 function Navbar() {
   const token = localStorage.getItem('token')
   const [isAdmin, setIsAdmin] = useState(false)
+  const [menuOpen, setMenuOpen] = useState(false)
+  const location = useLocation()
 
   useEffect(() => {
     if (!token) return
@@ -15,18 +17,73 @@ function Navbar() {
     .catch(() => setIsAdmin(false))
   }, [token])
 
+  const linkClass = (path) =>
+    `text-sm font-medium transition-colors duration-200 ${
+      location.pathname === path ? 'text-white' : 'text-gray-400 hover:text-white'
+    }`
+
   return (
-    <nav className="bg-gray-900 text-white px-6 py-4 flex justify-between items-center">
-      <Link to="/" className="text-xl font-bold">🛒 MiniShop</Link>
-      <div className="flex gap-4 items-center">
-        {token && <Link to="/cart" className="hover:text-gray-300">🛒 Carrito</Link>}
-        {token && isAdmin && <Link to="/admin-panel" className="hover:text-yellow-400">⚙️ Admin</Link>}
-        {!token && <Link to="/login" className="hover:text-gray-300">Login</Link>}
-        {!token && <Link to="/register" className="bg-blue-600 px-4 py-1 rounded hover:bg-blue-700">Registro</Link>}
-        {token && <button onClick={() => { localStorage.removeItem('token'); window.location.reload() }}
-          className="bg-red-600 px-4 py-1 rounded hover:bg-red-700">Salir</button>}
-        {token && <Link to="/profile" className="hover:text-gray-300">👤 Perfil</Link>}
+    <nav className="bg-gray-950 border-b border-gray-800 px-6 py-4">
+      <div className="max-w-6xl mx-auto flex justify-between items-center">
+
+        {/* Logo */}
+        <Link to="/" className="text-white text-xl font-bold tracking-tight">
+          🛒 MiniShop
+        </Link>
+
+        {/* Links */}
+        <div className="hidden sm:flex items-center gap-6">
+          <Link to="/" className={linkClass('/')}>Tienda</Link>
+          {token && <Link to="/cart" className={linkClass('/cart')}>Carrito</Link>}
+          {token && <Link to="/profile" className={linkClass('/profile')}>Perfil</Link>}
+          {token && isAdmin && (
+            <Link to="/admin-panel" className={linkClass('/admin-panel')}>Admin</Link>
+          )}
+        </div>
+
+        {/* Acciones */}
+        <div className="hidden sm:flex items-center gap-3">
+          {!token && (
+            <>
+              <Link to="/login" className="text-sm text-gray-400 hover:text-white transition-colors">
+                Iniciar sesión
+              </Link>
+              <Link to="/register" className="text-sm bg-white text-gray-900 px-4 py-1.5 rounded-full font-medium hover:bg-gray-200 transition-colors">
+                Registrarse
+              </Link>
+            </>
+          )}
+          {token && (
+            <button
+              onClick={() => { localStorage.removeItem('token'); window.location.reload() }}
+              className="text-sm text-gray-400 hover:text-red-400 transition-colors"
+            >
+              Salir
+            </button>
+          )}
+        </div>
+
+        {/* Mobile menu button */}
+        <button
+          className="sm:hidden text-gray-400 hover:text-white"
+          onClick={() => setMenuOpen(!menuOpen)}
+        >
+          {menuOpen ? '✕' : '☰'}
+        </button>
       </div>
+
+      {/* Mobile menu */}
+      {menuOpen && (
+        <div className="sm:hidden mt-4 flex flex-col gap-3 border-t border-gray-800 pt-4">
+          <Link to="/" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Tienda</Link>
+          {token && <Link to="/cart" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Carrito</Link>}
+          {token && <Link to="/profile" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Perfil</Link>}
+          {token && isAdmin && <Link to="/admin-panel" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Admin</Link>}
+          {!token && <Link to="/login" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Iniciar sesión</Link>}
+          {!token && <Link to="/register" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Registrarse</Link>}
+          {token && <button onClick={() => { localStorage.removeItem('token'); window.location.reload() }} className="text-red-400 text-sm text-left">Salir</button>}
+        </div>
+      )}
     </nav>
   )
 }
