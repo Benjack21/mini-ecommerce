@@ -6,14 +6,15 @@ function Profile() {
   const [user, setUser] = useState(null)
   const [cartCount, setCartCount] = useState(0)
   const token = localStorage.getItem('token')
-  const headers = { Authorization: `Bearer ${token}` }
   const navigate = useNavigate()
 
-  useEffect(() => {
+useEffect(() => {
     if (!token) {
       navigate('/login')
       return
     }
+    const headers = { Authorization: `Bearer ${token}` }
+
     axios.get('http://127.0.0.1:8000/api/me/', { headers })
       .then(res => setUser(res.data))
       .catch(() => navigate('/login'))
@@ -21,7 +22,7 @@ function Profile() {
     axios.get('http://127.0.0.1:8000/api/cart/me/', { headers })
       .then(res => setCartCount(res.data.length))
       .catch(err => console.error(err))
-  }, [token])
+  }, [token, navigate])
 
   if (!user) return <p className="p-6 text-gray-400">Cargando perfil...</p>
 
