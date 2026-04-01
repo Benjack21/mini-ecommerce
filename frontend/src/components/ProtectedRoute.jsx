@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 
 function ProtectedRoute({ children, adminOnly = false }) {
-  const [allowed, setAllowed] = useState(null)
+  const [allowed, setAllowed] = useState(!adminOnly)
   const token = localStorage.getItem('token')
   const navigate = useNavigate()
 
@@ -24,12 +24,10 @@ function ProtectedRoute({ children, adminOnly = false }) {
         }
       })
       .catch(() => navigate('/login'))
-    } else {
-      setAllowed(true)
     }
   }, [token, adminOnly, navigate])
 
-  if (allowed === null) return <p className="p-6 text-gray-400">Cargando...</p>
+  if (!allowed) return <p className="p-6 text-gray-400">Cargando...</p>
   return children
 }
 
