@@ -78,3 +78,13 @@ def get_cart(request):
         for item in items
     ]
     return Response(data)
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def me(request):
+    user = request.user
+    return Response({
+        'username': user.username,
+        'is_staff': user.is_staff,
+    })

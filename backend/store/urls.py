@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path
-from .views import CategoryViewSet, ProductViewSet, CartItemViewSet, register, add_to_cart, get_cart
+from .views import CategoryViewSet, ProductViewSet, CartItemViewSet, register, add_to_cart, get_cart, me
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet)
@@ -11,4 +11,5 @@ urlpatterns = router.urls + [
     path('register/', register),
     path('cart/add/', add_to_cart),   # lógica personalizada
     path('cart/me/', get_cart),       # carrito del usuario actual
+    path('me/', me),
 ]
