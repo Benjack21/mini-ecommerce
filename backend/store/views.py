@@ -174,3 +174,45 @@ def reviews(request, product_id):
             comment=comment
         )
         return Response({'message': 'Reseña creada'}, status=status.HTTP_201_CREATED)
+    
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def analytics(request):
+    if not request.user.is_staff:
+        return Response({'error': 'No autorizado'}, status=status.HTTP_403_FORBIDDEN)
+
+    from django.contrib.auth.models import User
+    from django.db.models import Sum, Count
+
+    total_products = Product.objects.count()
+    total_users = User.objects.count()
+    total_orders = Order.objects.count()
+    total_revenue = Order.objects.aggregate(Sum('total'))['total__sum'] or 0
+
+    top_products = (
+        OrderItem.objects
+        .values('product__name')
+        .annotate(total_sold=Sum('quantity'))
+        .order_by('-total_sold')[:5]
+    )
+
+    recent_orders = Order.objects.order_by('-created_at')[:5]
+    recent_data = [
+        {
+            'id': o.id,
+            'user': o.user.username,
+            'total': str(o.total),
+            'created_at': o.created_at.strftime('%d/%m/%Y %H:%M')
+        }
+        for o in recent_orders
+    ]
+
+    return Response({
+        'total_products': total_products,
+        'total_users': total_users,
+        'total_orders': total_orders,
+        'total_revenue': str(total_revenue),
+        'top_products': list(top_products),
+        'recent_orders': recent_data,
+    })

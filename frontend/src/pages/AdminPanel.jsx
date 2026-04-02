@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
+import { useNavigate } from 'react-router-dom'
 
 function AdminPanel() {
   const [products, setProducts] = useState([])
@@ -48,6 +49,8 @@ function AdminPanel() {
     setShowForm(false)
   }
 
+  const navigate = useNavigate()
+
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10">
       <div className="max-w-4xl mx-auto">
@@ -55,14 +58,22 @@ function AdminPanel() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-2xl font-bold text-gray-900">Panel de Administración</h1>
-          {!showForm && (
+          <div className="flex gap-3">
             <button
-              onClick={() => setShowForm(true)}
-              className="bg-gray-900 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors"
+              onClick={() => navigate('/analytics')}
+              className="border border-gray-200 text-gray-600 px-5 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition-colors"
             >
-              + Nuevo producto
+              📊 Ver analytics
             </button>
-          )}
+            {!showForm && (
+              <button
+                onClick={() => setShowForm(true)}
+                className="bg-gray-900 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors"
+              >
+                + Nuevo producto
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Formulario */}

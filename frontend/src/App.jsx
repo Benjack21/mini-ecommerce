@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute'
 import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 import Orders from './pages/Orders'
+import Analytics from './pages/Analytics'
 
 function App() {
   return (
@@ -29,6 +30,11 @@ function App() {
         } />
         <Route path="*" element={<NotFound />} />
         <Route path="/orders" element={<Orders />} />
+        <Route path="/analytics" element={
+          <ProtectedRoute adminOnly={true}>
+            <Analytics />
+          </ProtectedRoute>
+        } />
       </Routes>
     </BrowserRouter>
   )
