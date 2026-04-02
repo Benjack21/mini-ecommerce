@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Category, Product, CartItem, Order, OrderItem
+from .models import Category, Product, CartItem, Order, OrderItem, Review
 from .serializers import CategorySerializer, ProductSerializer, CartItemSerializer
 
 from rest_framework import viewsets, status
@@ -139,3 +139,38 @@ def get_orders(request):
         for order in orders
     ]
     return Response(data)
+
+@api_view(['GET', 'POST'])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
+def reviews(request, product_id):
+    if request.method == 'GET':
+        product_reviews = Review.objects.filter(product_id=product_id).order_by('-created_at')
+        data = [
+            {
+                'id': r.id,
+                'user': r.user.username,
+                'rating': r.rating,
+                'comment': r.comment,
+                'created_at': r.created_at.strftime('%d/%m/%Y')
+            }
+            for r in product_reviews
+        ]
+        return Response(data)
+
+    if request.method == 'POST':
+        if not request.user.is_authenticated:
+            return Response({'error': 'Debes iniciar sesión'}, status=status.HTTP_401_UNAUTHORIZED)
+
+        if Review.objects.filter(user=request.user, product_id=product_id).exists():
+            return Response({'error': 'Ya reseñaste este producto'}, status=status.HTTP_400_BAD_REQUEST)
+
+        rating = request.data.get('rating')
+        comment = request.data.get('comment')
+
+        Review.objects.create(
+            user=request.user,
+            product_id=product_id,
+            rating=rating,
+            comment=comment
+        )
+        return Response({'message': 'Reseña creada'}, status=status.HTTP_201_CREATED)

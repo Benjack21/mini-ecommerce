@@ -1,11 +1,12 @@
 from django.contrib import admin
-from .models import Category, Product, CartItem, Order, OrderItem
+from .models import Category, Product, CartItem, Order, OrderItem, Review
 
 admin.site.register(Category)
 admin.site.register(Product)
 admin.site.register(CartItem)
 admin.site.register(Order)
 admin.site.register(OrderItem)
+admin.site.register(Review)
 
 #Guarda y recarga la página del admin. Ahora deberías ver **Categories, Products y Cart Items** en el panel.
 ### 🧪 Agrega datos de prueba
