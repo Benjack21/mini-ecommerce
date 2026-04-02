@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Category, Product, CartItem
+from .models import Category, Product, CartItem, Order, OrderItem
 from .serializers import CategorySerializer, ProductSerializer, CartItemSerializer
 
 from rest_framework import viewsets, status
@@ -88,3 +88,54 @@ def me(request):
         'username': user.username,
         'is_staff': user.is_staff,
     })
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def place_order(request):
+    user = request.user
+    items = CartItem.objects.filter(user=user)
+
+    if not items.exists():
+        return Response({'error': 'El carrito está vacío'}, status=status.HTTP_400_BAD_REQUEST)
+
+    total = sum(item.product.price * item.quantity for item in items)
+
+    order = Order.objects.create(user=user, total=total)
+
+    for item in items:
+        OrderItem.objects.create(
+            order=order,
+            product=item.product,
+            quantity=item.quantity,
+            price=item.product.price
+        )
+
+    items.delete()
+
+    return Response({'message': 'Orden creada exitosamente', 'order_id': order.id}, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def get_orders(request):
+    user = request.user
+    orders = Order.objects.filter(user=user).order_by('-created_at')
+    data = [
+        {
+            'id': order.id,
+            'total': str(order.total),
+            'created_at': order.created_at.strftime('%d/%m/%Y %H:%M'),
+            'items': [
+                {
+                    'product': item.product.name if item.product else 'Producto eliminado',
+                    'quantity': item.quantity,
+                    'price': str(item.price)
+                }
+                for item in order.items.all()
+            ]
+        }
+        for order in orders
+    ]
+    return Response(data)

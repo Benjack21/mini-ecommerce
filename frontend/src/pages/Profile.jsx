@@ -83,6 +83,10 @@ function Profile() {
             <span className="text-sm text-gray-700">Ver tienda</span>
             <span className="text-gray-400">→</span>
           </Link>
+          <Link to="/orders" className="flex justify-between items-center px-6 py-4 border-b border-gray-100 hover:bg-gray-50 transition-colors">
+            <span className="text-sm text-gray-700">Mis órdenes</span>
+            <span className="text-gray-400">→</span>
+          </Link>
         </div>
 
         {/* Cerrar sesión */}

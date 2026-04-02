@@ -1,11 +1,14 @@
 import { useEffect, useState, useCallback } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import Toast from '../components/Toast'
+import useToast from '../hooks/useToast'
 
 function Cart() {
   const [items, setItems] = useState([])
   const token = localStorage.getItem('token')
   const navigate = useNavigate()
+  const { toast, showToast, hideToast } = useToast()
 
   const fetchCart = useCallback(() => {
     const headers = { Authorization: `Bearer ${token}` }
@@ -32,6 +35,19 @@ function Cart() {
     fetchCart()
   }
 
+  const placeOrder = async () => {
+    try {
+      await axios.post('http://127.0.0.1:8000/api/orders/place/', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      showToast('¡Orden creada exitosamente!')
+      fetchCart()
+      setTimeout(() => navigate('/orders'), 1500)
+    } catch {
+      showToast('Error al crear la orden', 'error')
+    }
+  }
+
   const total = items.reduce((sum, item) => sum + parseFloat(item.total), 0)
 
   if (!token) return (
@@ -39,10 +55,8 @@ function Cart() {
       <div className="text-center">
         <p className="text-5xl mb-4">🔒</p>
         <p className="text-gray-400 mb-4">Debes iniciar sesión para ver tu carrito</p>
-        <button
-          onClick={() => navigate('/login')}
-          className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors"
-        >
+        <button onClick={() => navigate('/login')}
+          className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors">
           Iniciar sesión
         </button>
       </div>
@@ -51,18 +65,16 @@ function Cart() {
 
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
       <div className="max-w-2xl mx-auto">
-
         <h1 className="text-2xl font-bold text-gray-900 mb-8">Mi Carrito</h1>
 
         {items.length === 0 ? (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm text-center py-20">
             <p className="text-5xl mb-4">🛍️</p>
             <p className="text-gray-400 mb-6">Tu carrito está vacío</p>
-            <button
-              onClick={() => navigate('/')}
-              className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors"
-            >
+            <button onClick={() => navigate('/')}
+              className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors">
               Ver productos
             </button>
           </div>
@@ -70,43 +82,22 @@ function Cart() {
           <div>
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4">
               {items.map((item, index) => (
-                <div
-                  key={item.id}
-                  className={`flex items-center justify-between px-6 py-4 ${
-                    index !== items.length - 1 ? 'border-b border-gray-100' : ''
-                  }`}
-                >
+                <div key={item.id} className={`flex items-center justify-between px-6 py-4 ${index !== items.length - 1 ? 'border-b border-gray-100' : ''}`}>
                   <span className="font-medium text-gray-900 w-1/3">{item.product}</span>
-
                   <div className="flex items-center gap-3">
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
-                      className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors"
-                    >
-                      −
-                    </button>
+                    <button onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors">−</button>
                     <span className="w-5 text-center text-sm font-medium">{item.quantity}</span>
-                    <button
-                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
-                      className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors"
-                    >
-                      +
-                    </button>
+                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors">+</button>
                   </div>
-
                   <span className="font-semibold text-gray-900">${item.total}</span>
-
-                  <button
-                    onClick={() => removeItem(item.id)}
-                    className="text-gray-300 hover:text-red-400 transition-colors text-lg"
-                  >
-                    ✕
-                  </button>
+                  <button onClick={() => removeItem(item.id)}
+                    className="text-gray-300 hover:text-red-400 transition-colors text-lg">✕</button>
                 </div>
               ))}
             </div>
 
-            {/* Total */}
             <div className="bg-white rounded-2xl border border-gray-100 shadow-sm px-6 py-5 mb-4">
               <div className="flex justify-between items-center">
                 <span className="text-gray-400 text-sm">Total</span>
@@ -114,7 +105,8 @@ function Cart() {
               </div>
             </div>
 
-            <button className="w-full bg-gray-900 text-white py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors">
+            <button onClick={placeOrder}
+              className="w-full bg-gray-900 text-white py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors">
               Proceder al pago
             </button>
           </div>

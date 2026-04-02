@@ -9,6 +9,7 @@ import AdminPanel from './pages/AdminPanel'
 import ProtectedRoute from './components/ProtectedRoute'
 import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
+import Orders from './pages/Orders'
 
 function App() {
   return (
@@ -27,6 +28,7 @@ function App() {
           </ProtectedRoute>
         } />
         <Route path="*" element={<NotFound />} />
+        <Route path="/orders" element={<Orders />} />
       </Routes>
     </BrowserRouter>
   )
