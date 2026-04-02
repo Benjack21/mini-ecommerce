@@ -14,6 +14,10 @@ from rest_framework.decorators import api_view, authentication_classes, permissi
 from rest_framework.authentication import SessionAuthentication
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
+from transbank.webpay.webpay_plus.transaction import Transaction
+from transbank.common.options import WebpayOptions
+from transbank.common.integration_type import IntegrationType
+
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
@@ -216,3 +220,63 @@ def analytics(request):
         'top_products': list(top_products),
         'recent_orders': recent_data,
     })
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def create_payment(request):
+    user = request.user
+    items = CartItem.objects.filter(user=user)
+
+    if not items.exists():
+        return Response({'error': 'El carrito está vacío'}, status=status.HTTP_400_BAD_REQUEST)
+
+    total = int(sum(item.product.price * item.quantity for item in items))
+    buy_order = f'order-{user.id}-{Order.objects.count() + 1}'
+    session_id = f'session-{user.id}'
+    return_url = 'http://localhost:5173/payment/confirm'
+
+    tx = Transaction(WebpayOptions(
+        commerce_code='597055555532',
+        api_key='579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C',
+        integration_type=IntegrationType.TEST
+    ))
+
+    response = tx.create(buy_order, session_id, total, return_url)
+
+    return Response({
+        'url': response['url'],
+        'token': response['token']
+    })
+
+
+@api_view(['POST'])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def confirm_payment(request):
+    token = request.data.get('token_ws')
+    user = request.user
+
+    tx = Transaction(WebpayOptions(
+        commerce_code='597055555532',
+        api_key='579B532A7440BB0C9079DED94D31EA1615BACEB56610332264630D42D0A36B1C',
+        integration_type=IntegrationType.TEST
+    ))
+
+    response = tx.commit(token)
+
+    if response['status'] == 'AUTHORIZED':
+        items = CartItem.objects.filter(user=user)
+        total = sum(item.product.price * item.quantity for item in items)
+        order = Order.objects.create(user=user, total=total)
+        for item in items:
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                quantity=item.quantity,
+                price=item.product.price
+            )
+        items.delete()
+        return Response({'message': 'Pago exitoso', 'order_id': order.id})
+
+    return Response({'error': 'Pago rechazado'}, status=status.HTTP_400_BAD_REQUEST)

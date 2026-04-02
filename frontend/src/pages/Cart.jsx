@@ -34,20 +34,7 @@ function Cart() {
     await axios.delete(`http://127.0.0.1:8000/api/cartitems/${id}/`, { headers })
     fetchCart()
   }
-
-  const placeOrder = async () => {
-    try {
-      await axios.post('http://127.0.0.1:8000/api/orders/place/', {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      showToast('¡Orden creada exitosamente!')
-      fetchCart()
-      setTimeout(() => navigate('/orders'), 1500)
-    } catch {
-      showToast('Error al crear la orden', 'error')
-    }
-  }
-
+  
   const total = items.reduce((sum, item) => sum + parseFloat(item.total), 0)
 
   if (!token) return (
@@ -62,6 +49,17 @@ function Cart() {
       </div>
     </div>
   )
+
+  const handlePayment = async () => {
+    try {
+      const res = await axios.post('http://127.0.0.1:8000/api/payment/create/', {}, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      window.location.href = `${res.data.url}?token_ws=${res.data.token}`
+    } catch {
+      showToast('Error al iniciar el pago', 'error')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10">
@@ -105,9 +103,11 @@ function Cart() {
               </div>
             </div>
 
-            <button onClick={placeOrder}
-              className="w-full bg-gray-900 text-white py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors">
-              Proceder al pago
+            <button
+              onClick={handlePayment}
+              className="w-full bg-gray-900 text-white py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors"
+            >
+              Pagar con Webpay
             </button>
           </div>
         )}

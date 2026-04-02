@@ -11,6 +11,7 @@ import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 import Orders from './pages/Orders'
 import Analytics from './pages/Analytics'
+import PaymentConfirm from './pages/PaymentConfirm'
 
 function App() {
   return (
@@ -35,6 +36,7 @@ function App() {
             <Analytics />
           </ProtectedRoute>
         } />
+        <Route path="/payment/confirm" element={<PaymentConfirm />} />
       </Routes>
     </BrowserRouter>
   )
