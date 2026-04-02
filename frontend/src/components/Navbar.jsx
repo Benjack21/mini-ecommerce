@@ -5,6 +5,7 @@ import axios from 'axios'
 function Navbar() {
   const token = localStorage.getItem('token')
   const [isAdmin, setIsAdmin] = useState(false)
+  const [cartCount, setCartCount] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
 
@@ -15,7 +16,13 @@ function Navbar() {
     })
     .then(res => setIsAdmin(res.data.is_staff))
     .catch(() => setIsAdmin(false))
-  }, [token])
+
+    axios.get('http://127.0.0.1:8000/api/cart/me/', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => setCartCount(res.data.length))
+    .catch(() => setCartCount(0))
+  }, [token, location])
 
   const linkClass = (path) =>
     `text-sm font-medium transition-colors duration-200 ${
@@ -34,7 +41,16 @@ function Navbar() {
         {/* Links */}
         <div className="hidden sm:flex items-center gap-6">
           <Link to="/" className={linkClass('/')}>Tienda</Link>
-          {token && <Link to="/cart" className={linkClass('/cart')}>Carrito</Link>}
+          {token && (
+            <Link to="/cart" className={`${linkClass('/cart')} relative`}>
+              Carrito
+              {cartCount > 0 && (
+                <span className="absolute -top-2 -right-4 bg-white text-gray-900 text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          )}
           {token && <Link to="/profile" className={linkClass('/profile')}>Perfil</Link>}
           {token && isAdmin && (
             <Link to="/admin-panel" className={linkClass('/admin-panel')}>Admin</Link>
@@ -76,7 +92,16 @@ function Navbar() {
       {menuOpen && (
         <div className="sm:hidden mt-4 flex flex-col gap-3 border-t border-gray-800 pt-4">
           <Link to="/" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Tienda</Link>
-          {token && <Link to="/cart" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Carrito</Link>}
+          {token && (
+            <Link to="/cart" className="text-gray-400 hover:text-white text-sm flex items-center gap-2" onClick={() => setMenuOpen(false)}>
+              Carrito
+              {cartCount > 0 && (
+                <span className="bg-white text-gray-900 text-xs font-bold px-2 py-0.5 rounded-full">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
+          )}
           {token && <Link to="/profile" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Perfil</Link>}
           {token && isAdmin && <Link to="/admin-panel" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Admin</Link>}
           {!token && <Link to="/login" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Iniciar sesión</Link>}

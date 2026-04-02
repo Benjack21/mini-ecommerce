@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import axios from 'axios'
+import Toast from '../components/Toast'
+import useToast from '../hooks/useToast'
 
 function ProductDetail() {
   const { id } = useParams()
@@ -8,6 +10,7 @@ function ProductDetail() {
   const [added, setAdded] = useState(false)
   const token = localStorage.getItem('token')
   const navigate = useNavigate()
+  const { toast, showToast, hideToast } = useToast()
 
   useEffect(() => {
     axios.get(`http://127.0.0.1:8000/api/products/${id}/`)
@@ -26,9 +29,10 @@ function ProductDetail() {
         { headers: { Authorization: `Bearer ${token}` } }
       )
       setAdded(true)
+      showToast('¡Agregado al carrito!')
       setTimeout(() => setAdded(false), 2000)
     } catch {
-      alert('Error al agregar al carrito')
+      showToast('Error al agregar al carrito', 'error')
     }
   }
 
@@ -40,8 +44,9 @@ function ProductDetail() {
 
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="max-w-4xl mx-auto">
+      {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
 
+      <div className="max-w-4xl mx-auto">
         <button
           onClick={() => navigate('/')}
           className="text-sm text-gray-400 hover:text-gray-900 transition-colors mb-8 flex items-center gap-1"
@@ -51,18 +56,15 @@ function ProductDetail() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="flex flex-col sm:flex-row">
-
             <img
               src={product.image_url}
               alt={product.name}
               className="w-full sm:w-1/2 h-80 object-cover"
             />
-
             <div className="p-8 flex flex-col justify-between w-full">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-3">{product.name}</h1>
                 <p className="text-gray-400 text-sm leading-relaxed mb-6">{product.description}</p>
-
                 <div className="flex items-center gap-4 mb-6">
                   <span className="text-3xl font-bold text-gray-900">${product.price}</span>
                   <span className={`text-sm px-3 py-1 rounded-full ${
@@ -74,7 +76,6 @@ function ProductDetail() {
                   </span>
                 </div>
               </div>
-
               <button
                 onClick={addToCart}
                 disabled={product.stock === 0}
@@ -88,7 +89,6 @@ function ProductDetail() {
               >
                 {added ? '✓ Agregado al carrito' : 'Agregar al carrito'}
               </button>
-
             </div>
           </div>
         </div>

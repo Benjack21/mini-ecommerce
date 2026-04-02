@@ -1,6 +1,10 @@
 frontend
 npm run dev
+
 dependencia
 npm install react-router-dom axios
 
 backend
+python -m venv venv
+venv\Scripts\activate
+python manage.py runserver

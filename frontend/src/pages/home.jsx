@@ -1,28 +1,36 @@
 import { useEffect, useState } from 'react'
 import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import Toast from '../components/Toast'
+import useToast from '../hooks/useToast'
+import Spinner from '../components/Spinner'
 
 function Home() {
   const [products, setProducts] = useState([])
   const [categories, setCategories] = useState([])
   const [selectedCategory, setSelectedCategory] = useState('')
   const [search, setSearch] = useState('')
+  const [loading, setLoading] = useState(true)
   const token = localStorage.getItem('token')
   const navigate = useNavigate()
+  const { toast, showToast, hideToast } = useToast()
 
   useEffect(() => {
-    axios.get('http://127.0.0.1:8000/api/products/')
-      .then(res => setProducts(res.data))
-      .catch(err => console.error(err))
-
-    axios.get('http://127.0.0.1:8000/api/categories/')
-      .then(res => setCategories(res.data))
-      .catch(err => console.error(err))
+    Promise.all([
+      axios.get('http://127.0.0.1:8000/api/products/'),
+      axios.get('http://127.0.0.1:8000/api/categories/')
+    ])
+    .then(([productsRes, categoriesRes]) => {
+      setProducts(productsRes.data)
+      setCategories(categoriesRes.data)
+    })
+    .catch(err => console.error(err))
+    .finally(() => setLoading(false))
   }, [token])
 
   const addToCart = async (productId) => {
     if (!token) {
-      alert('Debes iniciar sesión primero')
+      showToast('Debes iniciar sesión primero', 'warning')
       return
     }
     try {
@@ -30,9 +38,9 @@ function Home() {
         { product_id: productId, quantity: 1 },
         { headers: { Authorization: `Bearer ${token}` } }
       )
-      alert('¡Agregado al carrito!')
+      showToast('¡Agregado al carrito!')
     } catch {
-      alert('Error al agregar al carrito')
+      showToast('Error al agregar al carrito', 'error')
     }
   }
 
@@ -46,6 +54,8 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-gray-50">
+
+      {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
 
       {/* Hero */}
       <div className="bg-gray-950 text-white py-16 px-6 text-center">
@@ -77,7 +87,9 @@ function Home() {
         </div>
 
         {/* Productos */}
-        {filteredProducts.length === 0 ? (
+        {loading ? (
+          <Spinner />
+        ) : filteredProducts.length === 0 ? (
           <div className="text-center py-20 text-gray-400">
             <p className="text-5xl mb-4">🔍</p>
             <p className="text-lg">No se encontraron productos</p>
