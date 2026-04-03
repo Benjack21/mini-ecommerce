@@ -8,6 +8,8 @@ function Navbar() {
   const [cartCount, setCartCount] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
   const location = useLocation()
+  const [notifCount, setNotifCount] = useState(0)
+
 
   useEffect(() => {
     if (!token) return
@@ -22,6 +24,12 @@ function Navbar() {
     })
     .then(res => setCartCount(res.data.length))
     .catch(() => setCartCount(0))
+
+    axios.get('http://127.0.0.1:8000/api/notifications/', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => setNotifCount(res.data.filter(n => !n.read).length))
+    .catch(() => setNotifCount(0))
   }, [token, location])
 
   const linkClass = (path) =>
@@ -55,6 +63,16 @@ function Navbar() {
           {token && <Link to="/profile" className={linkClass('/profile')}>Perfil</Link>}
           {token && isAdmin && (
             <Link to="/admin-panel" className={linkClass('/admin-panel')}>Admin</Link>
+          )}
+          {token && (
+            <Link to="/notifications" className={`${linkClass('/notifications')} relative`}>
+              🔔
+              {notifCount > 0 && (
+                <span className="absolute -top-2 -right-3 bg-red-500 text-white text-xs font-bold w-4 h-4 rounded-full flex items-center justify-center">
+                  {notifCount}
+                </span>
+              )}
+            </Link>
           )}
         </div>
 

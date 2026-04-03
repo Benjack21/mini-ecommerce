@@ -13,6 +13,7 @@ import Orders from './pages/Orders'
 import Analytics from './pages/Analytics'
 import PaymentConfirm from './pages/PaymentConfirm'
 import Wishlist from './pages/Wishlist'
+import Notifications from './pages/Notifications'
 
 function App() {
   return (
@@ -39,6 +40,7 @@ function App() {
         } />
         <Route path="/payment/confirm" element={<PaymentConfirm />} />
         <Route path="/wishlist" element={<Wishlist />} />
+        <Route path="/notifications" element={<Notifications />} />
       </Routes>
     </BrowserRouter>
   )

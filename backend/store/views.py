@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Category, Product, CartItem, Order, OrderItem, Review, ProductImage, Wishlist
+from .models import Category, Product, CartItem, Order, OrderItem, Review, ProductImage, Wishlist, Notification
 from .serializers import CategorySerializer, ProductSerializer, CartItemSerializer
 
 from rest_framework import viewsets, status
@@ -277,6 +277,11 @@ def confirm_payment(request):
                 price=item.product.price
             )
         items.delete()
+        # Notificación automática
+        Notification.objects.create(
+            user=user,
+            message=f'✅ Tu orden #{order.id} fue creada exitosamente por ${total}'
+        )
         return Response({'message': 'Pago exitoso', 'order_id': order.id})
 
     return Response({'error': 'Pago rechazado'}, status=status.HTTP_400_BAD_REQUEST)
@@ -341,3 +346,27 @@ def wishlist(request):
         product_id = request.data.get('product_id')
         Wishlist.objects.filter(user=user, product_id=product_id).delete()
         return Response({'message': 'Eliminado de wishlist'})
+    
+@api_view(['GET'])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def get_notifications(request):
+    notifications = Notification.objects.filter(user=request.user).order_by('-created_at')[:20]
+    data = [
+        {
+            'id': n.id,
+            'message': n.message,
+            'read': n.read,
+            'created_at': n.created_at.strftime('%d/%m/%Y %H:%M')
+        }
+        for n in notifications
+    ]
+    return Response(data)
+
+
+@api_view(['PATCH'])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def mark_notifications_read(request):
+    Notification.objects.filter(user=request.user, read=False).update(read=True)
+    return Response({'message': 'Notificaciones marcadas como leídas'})
