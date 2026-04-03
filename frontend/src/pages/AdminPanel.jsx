@@ -51,6 +51,41 @@ function AdminPanel() {
 
   const navigate = useNavigate()
 
+  const [imageUrl, setImageUrl] = useState('')
+  const [selectedProductId, setSelectedProductId] = useState(null)
+  const [productImages, setProductImages] = useState([])
+
+  const fetchImages = async (productId) => {
+  const res = await axios.get(`http://127.0.0.1:8000/api/products/${productId}/`)
+    setProductImages(res.data.images || [])
+    setSelectedProductId(productId)
+  }
+
+  const addImage = async () => {
+    if (!imageUrl) return
+    await axios.post(`http://127.0.0.1:8000/api/products/${selectedProductId}/images/`,
+      { url: imageUrl },
+      { headers }
+    )
+    setImageUrl('')
+    fetchImages(selectedProductId)
+  }
+
+  const deleteImage = async (imageId) => {
+    await axios.delete(`http://127.0.0.1:8000/api/products/${selectedProductId}/images/`,
+      { data: { image_id: imageId }, headers }
+    )
+    fetchImages(selectedProductId)
+  }
+
+  const updateImage = async (imageId, newUrl) => {
+    await axios.patch(`http://127.0.0.1:8000/api/products/${selectedProductId}/images/`,
+      { image_id: imageId, url: newUrl },
+      { headers }
+    )
+    fetchImages(selectedProductId)
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10">
       <div className="max-w-4xl mx-auto">
@@ -137,7 +172,60 @@ function AdminPanel() {
             </div>
           </div>
         )}
+        {/*panel de imagenes*/}
+        {selectedProductId && (
+          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="font-semibold text-gray-900">
+                Imágenes del producto #{selectedProductId}
+              </h2>
+              <button
+                onClick={() => setSelectedProductId(null)}
+                className="text-gray-400 hover:text-gray-700 text-sm"
+              >
+                ✕ Cerrar
+              </button>
+            </div>
 
+            <div className="flex flex-col gap-3 mb-4">
+              {productImages.map(img => (
+                <div key={img.id} className="flex items-center gap-3 border border-gray-100 rounded-xl p-3">
+                  <img src={img.url} alt="extra" className="w-16 h-16 object-cover rounded-xl flex-shrink-0" />
+                  <input
+                    className="border border-gray-200 rounded-xl px-3 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    defaultValue={img.url}
+                    onBlur={e => {
+                      if (e.target.value !== img.url) {
+                        updateImage(img.id, e.target.value)
+                      }
+                    }}
+                  />
+                  <button
+                    onClick={() => deleteImage(img.id)}
+                    className="text-red-400 hover:text-red-600 border border-red-200 px-3 py-2 rounded-xl text-sm hover:bg-red-50 transition-colors flex-shrink-0"
+                  >
+                    Eliminar
+                  </button>
+                </div>
+              ))}
+            </div>
+
+            <div className="flex gap-3 border-t border-gray-100 pt-4">
+              <input
+                className="border border-gray-200 rounded-xl px-4 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                placeholder="URL de imagen extra"
+                value={imageUrl}
+                onChange={e => setImageUrl(e.target.value)}
+              />
+              <button
+                onClick={addImage}
+                className="bg-gray-900 text-white px-5 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors"
+              >
+                Agregar
+              </button>
+            </div>
+          </div>
+        )}
         {/* Lista de productos */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
           {products.length === 0 ? (
@@ -165,6 +253,12 @@ function AdminPanel() {
                   </div>
                 </div>
                 <div className="flex gap-2">
+                  <button
+                    onClick={() => fetchImages(product.id)}
+                    className="text-sm border border-gray-200 px-4 py-1.5 rounded-xl hover:bg-gray-50 transition-colors"
+                  >
+                    🖼️ Imágenes
+                  </button>
                   <button
                     onClick={() => handleEdit(product)}
                     className="text-sm border border-gray-200 px-4 py-1.5 rounded-xl hover:bg-gray-50 transition-colors"

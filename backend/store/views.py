@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Category, Product, CartItem, Order, OrderItem, Review
+from .models import Category, Product, CartItem, Order, OrderItem, Review, ProductImage
 from .serializers import CategorySerializer, ProductSerializer, CartItemSerializer
 
 from rest_framework import viewsets, status
@@ -280,3 +280,27 @@ def confirm_payment(request):
         return Response({'message': 'Pago exitoso', 'order_id': order.id})
 
     return Response({'error': 'Pago rechazado'}, status=status.HTTP_400_BAD_REQUEST)
+
+@api_view(['POST', 'DELETE', 'PATCH'])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def product_images(request, product_id):
+    if not request.user.is_staff:
+        return Response({'error': 'No autorizado'}, status=status.HTTP_403_FORBIDDEN)
+
+    if request.method == 'POST':
+        url = request.data.get('url')
+        product = Product.objects.get(id=product_id)
+        image = ProductImage.objects.create(product=product, url=url)
+        return Response({'id': image.id, 'url': image.url}, status=status.HTTP_201_CREATED)
+
+    if request.method == 'DELETE':
+        image_id = request.data.get('image_id')
+        ProductImage.objects.filter(id=image_id, product_id=product_id).delete()
+        return Response({'message': 'Imagen eliminada'})
+
+    if request.method == 'PATCH':
+        image_id = request.data.get('image_id')
+        url = request.data.get('url')
+        ProductImage.objects.filter(id=image_id, product_id=product_id).update(url=url)
+        return Response({'message': 'Imagen actualizada'})

@@ -10,10 +10,11 @@ function ProductDetail() {
   const [reviews, setReviews] = useState([])
   const [form, setForm] = useState({ rating: 5, comment: '' })
   const [added, setAdded] = useState(false)
+  const [selectedImage, setSelectedImage] = useState(null)
   const token = localStorage.getItem('token')
   const navigate = useNavigate()
   const { toast, showToast, hideToast } = useToast()
-  
+
   const fetchReviews = useCallback(() => {
     axios.get(`http://127.0.0.1:8000/api/products/${id}/reviews/`)
       .then(res => setReviews(res.data))
@@ -24,15 +25,21 @@ function ProductDetail() {
     axios.get(`http://127.0.0.1:8000/api/products/${id}/`)
       .then(res => setProduct(res.data))
       .catch(err => console.error(err))
+    fetchReviews()
+  }, [id, fetchReviews])
 
+  useEffect(() => {
+    axios.get(`http://127.0.0.1:8000/api/products/${id}/`)
+      .then(res => {
+        setProduct(res.data)
+        setSelectedImage(res.data.image_url)
+      })
+      .catch(err => console.error(err))
     fetchReviews()
   }, [id, fetchReviews])
 
   const addToCart = async () => {
-    if (!token) {
-      navigate('/login')
-      return
-    }
+    if (!token) { navigate('/login'); return }
     try {
       await axios.post('http://127.0.0.1:8000/api/cart/add/',
         { product_id: id, quantity: 1 },
@@ -47,10 +54,7 @@ function ProductDetail() {
   }
 
   const submitReview = async () => {
-    if (!token) {
-      navigate('/login')
-      return
-    }
+    if (!token) { navigate('/login'); return }
     try {
       await axios.post(`http://127.0.0.1:8000/api/products/${id}/reviews/`,
         form,
@@ -79,21 +83,63 @@ function ProductDetail() {
       {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
 
       <div className="max-w-4xl mx-auto">
-        <button
-          onClick={() => navigate('/')}
-          className="text-sm text-gray-400 hover:text-gray-900 transition-colors mb-8 flex items-center gap-1"
-        >
+        <button onClick={() => navigate('/')}
+          className="text-sm text-gray-400 hover:text-gray-900 transition-colors mb-8 flex items-center gap-1">
           ← Volver a productos
         </button>
 
         {/* Producto */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
           <div className="flex flex-col sm:flex-row">
-            <img
-              src={product.image_url}
-              alt={product.name}
-              className="w-full sm:w-1/2 h-80 object-cover"
-            />
+            {/* Galería con carrusel */}
+            <div className="w-full sm:w-1/2 relative">
+              <img
+                src={selectedImage || product.image_url}
+                alt={product.name}
+                className="w-full h-80 object-cover"
+              />
+
+              {product.images && product.images.length > 0 && (
+                <>
+                  <button
+                    onClick={() => {
+                      const allImages = [product.image_url, ...product.images.map(img => img.url)]
+                      const currentIndex = allImages.indexOf(selectedImage)
+                      const prevIndex = (currentIndex - 1 + allImages.length) % allImages.length
+                      setSelectedImage(allImages[prevIndex])
+                    }}
+                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 w-8 h-8 rounded-full flex items-center justify-center shadow transition-all"
+                  >
+                    ←
+                  </button>
+
+                  <button
+                    onClick={() => {
+                      const allImages = [product.image_url, ...product.images.map(img => img.url)]
+                      const currentIndex = allImages.indexOf(selectedImage)
+                      const nextIndex = (currentIndex + 1) % allImages.length
+                      setSelectedImage(allImages[nextIndex])
+                    }}
+                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 w-8 h-8 rounded-full flex items-center justify-center shadow transition-all"
+                  >
+                    →
+                  </button>
+
+                  {/* Indicadores */}
+                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
+                    {[product.image_url, ...product.images.map(img => img.url)].map((img, index) => (
+                      <button
+                        key={index}
+                        onClick={() => setSelectedImage(img)}
+                        className={`w-2 h-2 rounded-full transition-all ${
+                          selectedImage === img ? 'bg-white w-4' : 'bg-white bg-opacity-50'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
+            </div>
             <div className="p-8 flex flex-col justify-between w-full">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
@@ -112,15 +158,12 @@ function ProductDetail() {
                   </span>
                 </div>
               </div>
-              <button
-                onClick={addToCart}
-                disabled={product.stock === 0}
+              <button onClick={addToCart} disabled={product.stock === 0}
                 className={`w-full py-3 rounded-xl text-sm font-medium transition-colors ${
                   added ? 'bg-green-500 text-white'
                   : product.stock === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
                   : 'bg-gray-900 text-white hover:bg-gray-700'
-                }`}
-              >
+                }`}>
                 {added ? '✓ Agregado al carrito' : 'Agregar al carrito'}
               </button>
             </div>
@@ -130,7 +173,6 @@ function ProductDetail() {
         {/* Reseñas */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
           <h2 className="text-lg font-bold text-gray-900 mb-6">Reseñas</h2>
-
           {reviews.length === 0 ? (
             <p className="text-gray-400 text-sm mb-6">Aún no hay reseñas. ¡Sé el primero!</p>
           ) : (
@@ -147,35 +189,24 @@ function ProductDetail() {
               ))}
             </div>
           )}
-
-          {/* Formulario */}
           {token ? (
             <div className="border-t border-gray-100 pt-6">
               <h3 className="text-sm font-semibold text-gray-900 mb-4">Escribir reseña</h3>
               <div className="flex gap-2 mb-3">
                 {[1, 2, 3, 4, 5].map(star => (
-                  <button
-                    key={star}
-                    onClick={() => setForm({...form, rating: star})}
+                  <button key={star} onClick={() => setForm({...form, rating: star})}
                     className={`text-2xl transition-transform hover:scale-110 ${
                       star <= form.rating ? 'text-yellow-400' : 'text-gray-200'
-                    }`}
-                  >
-                    ⭐
-                  </button>
+                    }`}>⭐</button>
                 ))}
               </div>
-              <textarea
-                rows={3}
-                placeholder="Escribe tu opinión..."
+              <textarea rows={3} placeholder="Escribe tu opinión..."
                 value={form.comment}
                 onChange={e => setForm({...form, comment: e.target.value})}
                 className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 mb-3"
               />
-              <button
-                onClick={submitReview}
-                className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors"
-              >
+              <button onClick={submitReview}
+                className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors">
                 Publicar reseña
               </button>
             </div>

@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path
-from .views import CategoryViewSet, ProductViewSet, CartItemViewSet, register, add_to_cart, get_cart, me, get_orders, get_cart, place_order, reviews, analytics, create_payment, confirm_payment
+from .views import CategoryViewSet, ProductViewSet, CartItemViewSet, register, add_to_cart, get_cart, me, get_orders, get_cart, place_order, reviews, analytics, create_payment, confirm_payment, product_images
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet)
@@ -15,6 +15,7 @@ urlpatterns = router.urls + [
     path('orders/place/', place_order),
     path('orders/me/', get_orders),
     path('products/<int:product_id>/reviews/', reviews),
+    path('products/<int:product_id>/images/', product_images),
     path('analytics/', analytics),
     path('payment/create/', create_payment),
     path('payment/confirm/', confirm_payment),
