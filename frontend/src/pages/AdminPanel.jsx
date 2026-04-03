@@ -190,7 +190,7 @@ function AdminPanel() {
             <div className="flex flex-col gap-3 mb-4">
               {productImages.map(img => (
                 <div key={img.id} className="flex items-center gap-3 border border-gray-100 rounded-xl p-3">
-                  <img src={img.url} alt="extra" className="w-16 h-16 object-cover rounded-xl flex-shrink-0" />
+                  <img src={img.url} alt="extra" className="w-16 h-16 object-cover rounded-xl shrink-0" />
                   <input
                     className="border border-gray-200 rounded-xl px-3 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-gray-300"
                     defaultValue={img.url}
@@ -202,7 +202,7 @@ function AdminPanel() {
                   />
                   <button
                     onClick={() => deleteImage(img.id)}
-                    className="text-red-400 hover:text-red-600 border border-red-200 px-3 py-2 rounded-xl text-sm hover:bg-red-50 transition-colors flex-shrink-0"
+                    className="text-red-400 hover:text-red-600 border border-red-200 px-3 py-2 rounded-xl text-sm hover:bg-red-50 transition-colors shrink-0"
                   >
                     Eliminar
                   </button>

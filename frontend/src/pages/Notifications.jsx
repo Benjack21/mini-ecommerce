@@ -18,16 +18,17 @@ function Notifications() {
     .finally(() => setLoading(false))
   }, [token])
 
-  const markAllRead = () => {
+  const markAllRead = useCallback(() => {
     axios.patch('http://127.0.0.1:8000/api/notifications/read/', {}, {
       headers: { Authorization: `Bearer ${token}` }
     }).catch(err => console.error(err))
-  }
+  }, [token])
+
   useEffect(() => {
     if (!token) { navigate('/login'); return }
     fetchNotifications()
     markAllRead()
-  }, [token, navigate, fetchNotifications])
+  }, [token, navigate, fetchNotifications, markAllRead])
 
   if (loading) return <Spinner />
 
@@ -52,7 +53,7 @@ function Notifications() {
               >
                 <div className="flex justify-between items-start gap-4">
                   <p className="text-sm text-gray-700">{n.message}</p>
-                  <span className="text-xs text-gray-400 flex-shrink-0">{n.created_at}</span>
+                  <span className="text-xs text-gray-400 shrink-0">{n.created_at}</span>
                 </div>
                 {!n.read && (
                   <span className="inline-block mt-1 text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">
