@@ -1,6 +1,6 @@
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Category, Product, CartItem, Order, OrderItem, Review, ProductImage
+from .models import Category, Product, CartItem, Order, OrderItem, Review, ProductImage, Wishlist
 from .serializers import CategorySerializer, ProductSerializer, CartItemSerializer
 
 from rest_framework import viewsets, status
@@ -304,3 +304,40 @@ def product_images(request, product_id):
         url = request.data.get('url')
         ProductImage.objects.filter(id=image_id, product_id=product_id).update(url=url)
         return Response({'message': 'Imagen actualizada'})
+    
+@api_view(['GET', 'POST', 'DELETE'])
+@authentication_classes([JWTAuthentication, SessionAuthentication])
+@permission_classes([IsAuthenticated])
+def wishlist(request):
+    user = request.user
+
+    if request.method == 'GET':
+        items = Wishlist.objects.filter(user=user)
+        data = [
+            {
+                'id': item.id,
+                'product_id': item.product.id,
+                'name': item.product.name,
+                'price': str(item.product.price),
+                'image_url': item.product.image_url,
+            }
+            for item in items
+        ]
+        return Response(data)
+
+    if request.method == 'POST':
+        product_id = request.data.get('product_id')
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({'error': 'Producto no encontrado'}, status=status.HTTP_404_NOT_FOUND)
+
+        item, created = Wishlist.objects.get_or_create(user=user, product=product)
+        if not created:
+            return Response({'error': 'Ya está en tu wishlist'}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({'message': 'Agregado a wishlist'}, status=status.HTTP_201_CREATED)
+
+    if request.method == 'DELETE':
+        product_id = request.data.get('product_id')
+        Wishlist.objects.filter(user=user, product_id=product_id).delete()
+        return Response({'message': 'Eliminado de wishlist'})
