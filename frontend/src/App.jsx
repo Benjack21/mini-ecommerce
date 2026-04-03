@@ -12,6 +12,7 @@ import NotFound from './pages/NotFound'
 import Orders from './pages/Orders'
 import Analytics from './pages/Analytics'
 import PaymentConfirm from './pages/PaymentConfirm'
+import Wishlist from './pages/Wishlist'
 
 function App() {
   return (
@@ -37,6 +38,7 @@ function App() {
           </ProtectedRoute>
         } />
         <Route path="/payment/confirm" element={<PaymentConfirm />} />
+        <Route path="/wishlist" element={<Wishlist />} />
       </Routes>
     </BrowserRouter>
   )

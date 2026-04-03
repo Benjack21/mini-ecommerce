@@ -38,7 +38,7 @@ function Navbar() {
           🛒 MiniShop
         </Link>
 
-        {/* Links */}
+        {/* Links desktop */}
         <div className="hidden sm:flex items-center gap-6">
           <Link to="/" className={linkClass('/')}>Tienda</Link>
           {token && (
@@ -51,13 +51,14 @@ function Navbar() {
               )}
             </Link>
           )}
+          {token && <Link to="/wishlist" className={linkClass('/wishlist')}>Wishlist</Link>}
           {token && <Link to="/profile" className={linkClass('/profile')}>Perfil</Link>}
           {token && isAdmin && (
             <Link to="/admin-panel" className={linkClass('/admin-panel')}>Admin</Link>
           )}
         </div>
 
-        {/* Acciones */}
+        {/* Acciones desktop */}
         <div className="hidden sm:flex items-center gap-3">
           {!token && (
             <>
@@ -102,6 +103,7 @@ function Navbar() {
               )}
             </Link>
           )}
+          {token && <Link to="/wishlist" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Wishlist</Link>}
           {token && <Link to="/profile" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Perfil</Link>}
           {token && isAdmin && <Link to="/admin-panel" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Admin</Link>}
           {!token && <Link to="/login" className="text-gray-400 hover:text-white text-sm" onClick={() => setMenuOpen(false)}>Iniciar sesión</Link>}

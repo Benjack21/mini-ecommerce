@@ -11,6 +11,7 @@ function ProductDetail() {
   const [form, setForm] = useState({ rating: 5, comment: '' })
   const [added, setAdded] = useState(false)
   const [selectedImage, setSelectedImage] = useState(null)
+  const [inWishlist, setInWishlist] = useState(false)
   const token = localStorage.getItem('token')
   const navigate = useNavigate()
   const { toast, showToast, hideToast } = useToast()
@@ -23,13 +24,6 @@ function ProductDetail() {
 
   useEffect(() => {
     axios.get(`http://127.0.0.1:8000/api/products/${id}/`)
-      .then(res => setProduct(res.data))
-      .catch(err => console.error(err))
-    fetchReviews()
-  }, [id, fetchReviews])
-
-  useEffect(() => {
-    axios.get(`http://127.0.0.1:8000/api/products/${id}/`)
       .then(res => {
         setProduct(res.data)
         setSelectedImage(res.data.image_url)
@@ -37,6 +31,18 @@ function ProductDetail() {
       .catch(err => console.error(err))
     fetchReviews()
   }, [id, fetchReviews])
+
+  useEffect(() => {
+    if (!token) return
+    axios.get('http://127.0.0.1:8000/api/wishlist/', {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    .then(res => {
+      const found = res.data.some(item => item.product_id === parseInt(id))
+      setInWishlist(found)
+    })
+    .catch(err => console.error(err))
+  }, [id, token])
 
   const addToCart = async () => {
     if (!token) { navigate('/login'); return }
@@ -50,6 +56,28 @@ function ProductDetail() {
       setTimeout(() => setAdded(false), 2000)
     } catch {
       showToast('Error al agregar al carrito', 'error')
+    }
+  }
+
+  const toggleWishlist = async () => {
+    if (!token) { navigate('/login'); return }
+    try {
+      if (inWishlist) {
+        await axios.delete('http://127.0.0.1:8000/api/wishlist/',
+          { data: { product_id: id }, headers: { Authorization: `Bearer ${token}` } }
+        )
+        setInWishlist(false)
+        showToast('Eliminado de tu wishlist')
+      } else {
+        await axios.post('http://127.0.0.1:8000/api/wishlist/',
+          { product_id: id },
+          { headers: { Authorization: `Bearer ${token}` } }
+        )
+        setInWishlist(true)
+        showToast('¡Agregado a tu wishlist!')
+      }
+    } catch {
+      showToast('Error al actualizar wishlist', 'error')
     }
   }
 
@@ -91,6 +119,7 @@ function ProductDetail() {
         {/* Producto */}
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
           <div className="flex flex-col sm:flex-row">
+
             {/* Galería con carrusel */}
             <div className="w-full sm:w-1/2 relative">
               <img
@@ -98,7 +127,6 @@ function ProductDetail() {
                 alt={product.name}
                 className="w-full h-80 object-cover"
               />
-
               {product.images && product.images.length > 0 && (
                 <>
                   <button
@@ -109,10 +137,7 @@ function ProductDetail() {
                       setSelectedImage(allImages[prevIndex])
                     }}
                     className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 w-8 h-8 rounded-full flex items-center justify-center shadow transition-all"
-                  >
-                    ←
-                  </button>
-
+                  >←</button>
                   <button
                     onClick={() => {
                       const allImages = [product.image_url, ...product.images.map(img => img.url)]
@@ -121,11 +146,7 @@ function ProductDetail() {
                       setSelectedImage(allImages[nextIndex])
                     }}
                     className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 w-8 h-8 rounded-full flex items-center justify-center shadow transition-all"
-                  >
-                    →
-                  </button>
-
-                  {/* Indicadores */}
+                  >→</button>
                   <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
                     {[product.image_url, ...product.images.map(img => img.url)].map((img, index) => (
                       <button
@@ -140,6 +161,7 @@ function ProductDetail() {
                 </>
               )}
             </div>
+
             <div className="p-8 flex flex-col justify-between w-full">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
@@ -158,14 +180,29 @@ function ProductDetail() {
                   </span>
                 </div>
               </div>
-              <button onClick={addToCart} disabled={product.stock === 0}
-                className={`w-full py-3 rounded-xl text-sm font-medium transition-colors ${
-                  added ? 'bg-green-500 text-white'
-                  : product.stock === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-900 text-white hover:bg-gray-700'
-                }`}>
-                {added ? '✓ Agregado al carrito' : 'Agregar al carrito'}
-              </button>
+              <div className="flex gap-3">
+                <button
+                  onClick={toggleWishlist}
+                  className={`px-4 py-3 rounded-xl text-sm font-medium border transition-colors ${
+                    inWishlist
+                      ? 'border-red-300 text-red-400 hover:bg-red-50'
+                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
+                  }`}
+                >
+                  {inWishlist ? '❤️' : '🤍'}
+                </button>
+                <button
+                  onClick={addToCart}
+                  disabled={product.stock === 0}
+                  className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${
+                    added ? 'bg-green-500 text-white'
+                    : product.stock === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
+                    : 'bg-gray-900 text-white hover:bg-gray-700'
+                  }`}
+                >
+                  {added ? '✓ Agregado al carrito' : 'Agregar al carrito'}
+                </button>
+              </div>
             </div>
           </div>
         </div>
