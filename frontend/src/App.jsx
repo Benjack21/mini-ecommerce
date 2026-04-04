@@ -14,7 +14,7 @@ import Analytics from './pages/Analytics'
 import PaymentConfirm from './pages/PaymentConfirm'
 import Wishlist from './pages/Wishlist'
 import Notifications from './pages/Notifications'
-
+import SupportChat from './components/SupportChat'
 function App() {
   return (
     <BrowserRouter>
@@ -42,6 +42,7 @@ function App() {
         <Route path="/wishlist" element={<Wishlist />} />
         <Route path="/notifications" element={<Notifications />} />
       </Routes>
+      <SupportChat />
     </BrowserRouter>
   )
 }

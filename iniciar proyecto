@@ -8,3 +8,12 @@ backend
 python -m venv venv
 venv\Scripts\activate
 python manage.py runserver
+
+💳 Tarjeta de Débito (Redcompra)
+Campo
+Valor Número
+4051 8842 3993 7763
+RUT
+11.111.111-1
+Contraseña
+123
