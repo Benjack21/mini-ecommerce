@@ -22,7 +22,7 @@ Aplicación web de tienda online construida con React y Django.
 - **WhiteNoise** 6.12.0 - Servir archivos estáticos
 - **Transbank SDK** 6.1.0 - Integración de pagos
 
-## ✅ Funcionalidades
+## Funcionalidades
 
 - Registro e inicio de sesión con JWT
 - Listado de productos
@@ -32,7 +32,7 @@ Aplicación web de tienda online construida con React y Django.
 - Autenticación segura con tokens JWT
 - API RESTful completa
 
-## ⚙️ Cómo correr el proyecto
+## Cómo correr el proyecto
 #pendiente
 
 📸 Screenshots
