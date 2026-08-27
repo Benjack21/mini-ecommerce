@@ -2,7 +2,7 @@
 
 Aplicación web de tienda online construida con React y Django.
 
-## 🚀 Tecnologías
+## Tecnologías
 
 ### Frontend
 - **React** 19.2.4 - UI Framework
@@ -33,19 +33,21 @@ Aplicación web de tienda online construida con React y Django.
 - API RESTful completa
 
 ## ⚙️ Cómo correr el proyecto
-
-### Backend
-```bash
-cd backend
-python -m venv venv
-venv\Scripts\activate
-pip install -r requirements.txt
-python manage.py migrate
-python manage.py runserver
-
-cd frontend
-npm install
-npm run dev
+#pendiente
 
 📸 Screenshots
-(agrega capturas de pantalla aquí)
+<br>
+-home
+<br>
+<img width="600" height="500" alt="image" src="https://github.com/user-attachments/assets/a6eb16e4-fb45-42cf-81ae-c389481c4ee7" />
+<br>
+-panel admin
+<br>
+<img width="600" height="500" alt="image" src="https://github.com/user-attachments/assets/cbfc121e-0312-41f6-a94f-aeee4af09b2e" />
+<br>
+-detalles producto
+<br>
+<img width="600" height="500" alt="image" src="https://github.com/user-attachments/assets/83a682a0-bc33-4377-99c8-55811a9ad047" />
+<br>
+-pendientes
+<br>
