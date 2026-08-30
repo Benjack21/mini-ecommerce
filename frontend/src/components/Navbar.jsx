@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Link, useLocation } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 
 function Navbar() {
   const token = localStorage.getItem('token')
@@ -13,24 +13,22 @@ function Navbar() {
 
   useEffect(() => {
     if (!token) return
-    axios.get('http://127.0.0.1:8000/api/me/', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(res => setIsAdmin(res.data.is_staff))
-    .catch(() => setIsAdmin(false))
 
-    axios.get('http://127.0.0.1:8000/api/cart/me/', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(res => setCartCount(res.data.length))
-    .catch(() => setCartCount(0))
+    api.get('/me/')
+      .then(res => setIsAdmin(res.data.is_staff))
+      .catch(() => setIsAdmin(false))
 
-    axios.get('http://127.0.0.1:8000/api/notifications/', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(res => setNotifCount(res.data.filter(n => !n.read).length))
-    .catch(() => setNotifCount(0))
+    api.get('/cart/me/')
+      .then(res => setCartCount(res.data.length))
+      .catch(() => setCartCount(0))
+
+    api.get('/notifications/')
+      .then(res => {
+        setNotifCount(res.data.filter(n => !n.read).length)
+      })
+      .catch(() => setNotifCount(0))
   }, [token, location])
+
 
   const linkClass = (path) =>
     `text-sm font-medium transition-colors duration-200 ${

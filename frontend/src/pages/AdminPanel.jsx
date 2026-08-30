@@ -1,18 +1,26 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import api from '../api'
 
 function AdminPanel() {
   const [products, setProducts] = useState([])
-  const [form, setForm] = useState({ name: '', description: '', price: '', stock: '', image_url: '', category: '' })
+  const [form, setForm] = useState({
+    name: '',
+    description: '',
+    price: '',
+    stock: '',
+    image_url: '',
+    category: ''
+  })
   const [editingId, setEditingId] = useState(null)
   const [showForm, setShowForm] = useState(false)
-  const token = localStorage.getItem('token')
-  const headers = { Authorization: `Bearer ${token}` }
 
   const fetchProducts = () => {
-    axios.get('http://127.0.0.1:8000/api/products/')
+    api.get('/products/')
       .then(res => setProducts(res.data))
+      .catch(err => {
+        console.error('Error al obtener productos:', err)
+      })
   }
 
   useEffect(() => {
@@ -20,15 +28,28 @@ function AdminPanel() {
   }, [])
 
   const handleSave = async () => {
-    if (editingId) {
-      await axios.put(`http://127.0.0.1:8000/api/products/${editingId}/`, form, { headers })
-    } else {
-      await axios.post('http://127.0.0.1:8000/api/products/', form, { headers })
+    try {
+      if (editingId) {
+        await api.put(`/products/${editingId}/`, form)
+      } else {
+        await api.post('/products/', form)
+      }
+
+      setForm({
+        name: '',
+        description: '',
+        price: '',
+        stock: '',
+        image_url: '',
+        category: ''
+      })
+
+      setEditingId(null)
+      setShowForm(false)
+      fetchProducts()
+    } catch (err) {
+      console.error('Error al guardar producto:', err)
     }
-    setForm({ name: '', description: '', price: '', stock: '', image_url: '', category: '' })
-    setEditingId(null)
-    setShowForm(false)
-    fetchProducts()
   }
 
   const handleEdit = (product) => {
@@ -39,12 +60,25 @@ function AdminPanel() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('¿Eliminar este producto?')) return
-    await axios.delete(`http://127.0.0.1:8000/api/products/${id}/`, { headers })
-    fetchProducts()
+
+    try {
+      await api.delete(`/products/${id}/`)
+      fetchProducts()
+    } catch (err) {
+      console.error('Error al eliminar producto:', err)
+    }
   }
 
   const handleCancel = () => {
-    setForm({ name: '', description: '', price: '', stock: '', image_url: '', category: '' })
+    setForm({
+      name: '',
+      description: '',
+      price: '',
+      stock: '',
+      image_url: '',
+      category: ''
+    })
+
     setEditingId(null)
     setShowForm(false)
   }
@@ -56,34 +90,60 @@ function AdminPanel() {
   const [productImages, setProductImages] = useState([])
 
   const fetchImages = async (productId) => {
-  const res = await axios.get(`http://127.0.0.1:8000/api/products/${productId}/`)
-    setProductImages(res.data.images || [])
-    setSelectedProductId(productId)
+    try {
+      const res = await api.get(`/products/${productId}/`)
+      setProductImages(res.data.images || [])
+      setSelectedProductId(productId)
+    } catch (err) {
+      console.error('Error al obtener imágenes:', err)
+    }
   }
 
   const addImage = async () => {
     if (!imageUrl) return
-    await axios.post(`http://127.0.0.1:8000/api/products/${selectedProductId}/images/`,
-      { url: imageUrl },
-      { headers }
-    )
-    setImageUrl('')
-    fetchImages(selectedProductId)
+
+    try {
+      await api.post(
+        `/products/${selectedProductId}/images/`,
+        { url: imageUrl }
+      )
+
+      setImageUrl('')
+      fetchImages(selectedProductId)
+    } catch (err) {
+      console.error('Error al agregar imagen:', err)
+    }
   }
 
   const deleteImage = async (imageId) => {
-    await axios.delete(`http://127.0.0.1:8000/api/products/${selectedProductId}/images/`,
-      { data: { image_id: imageId }, headers }
-    )
-    fetchImages(selectedProductId)
+    try {
+      await api.delete(
+        `/products/${selectedProductId}/images/`,
+        {
+          data: { image_id: imageId }
+        }
+      )
+
+      fetchImages(selectedProductId)
+    } catch (err) {
+      console.error('Error al eliminar imagen:', err)
+    }
   }
 
   const updateImage = async (imageId, newUrl) => {
-    await axios.patch(`http://127.0.0.1:8000/api/products/${selectedProductId}/images/`,
-      { image_id: imageId, url: newUrl },
-      { headers }
-    )
-    fetchImages(selectedProductId)
+    try {
+      await api.patch(
+        `/products/${selectedProductId}/images/`,
+        {
+          image_id: imageId,
+          url: newUrl
+        }
+      )
+
+      fetchImages(selectedProductId)
+    } catch (err) {
+      console.error('Error al actualizar imagen:', err)
+    }
   }
 
   return (

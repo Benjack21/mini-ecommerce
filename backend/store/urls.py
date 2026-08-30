@@ -1,6 +1,6 @@
 from rest_framework.routers import DefaultRouter
 from django.urls import path
-from .views import CategoryViewSet, ProductViewSet, CartItemViewSet, register, add_to_cart, get_cart, me, get_orders, get_cart, place_order, reviews, analytics, create_payment, confirm_payment, product_images, wishlist, get_notifications, mark_notifications_read 
+from .views import CategoryViewSet, ProductViewSet, CartItemViewSet, register, add_to_cart, get_cart, me, get_orders, get_cart, place_order, reviews, analytics, create_payment, confirm_payment, product_images, wishlist, get_notifications, mark_notifications_read, groq_chat
 
 router = DefaultRouter()
 router.register(r'categories', CategoryViewSet)
@@ -22,4 +22,5 @@ urlpatterns = router.urls + [
     path('wishlist/', wishlist),
     path('notifications/', get_notifications),
     path('notifications/read/', mark_notifications_read),
+    path('chat/', groq_chat),
 ]

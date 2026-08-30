@@ -1,9 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
+import api from '../api'
 
 function SupportChat() {
   const [open, setOpen] = useState(false)
   const [messages, setMessages] = useState([
-    { role: 'assistant', content: '¡Hola! Soy el asistente de MiniShop. ¿En qué puedo ayudarte? 😊' }
+    {
+      role: 'assistant',
+      content: '¡Hola! Soy el asistente de MiniShop. ¿En qué puedo ayudarte? 😊'
+    }
   ])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -16,72 +20,52 @@ function SupportChat() {
   const sendMessage = async () => {
     if (!input.trim() || loading) return
 
-    const userMessage = { role: 'user', content: input }
+    const userMessage = {
+      role: 'user',
+      content: input.trim()
+    }
+
     const updatedMessages = [...messages, userMessage]
+
     setMessages(updatedMessages)
     setInput('')
     setLoading(true)
 
     try {
-      const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_GROQ_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: 'llama-3.3-70b-versatile',
-          messages: [
-            {
-              role: 'system',
-              content: `Eres un asistente de soporte de MiniShop, una tienda online chilena.
-
-              INFORMACIÓN DE LA TIENDA:
-              - Vendemos productos electrónicos y ropa
-              - Aceptamos pagos con Webpay (tarjetas de crédito y débito)
-              - Los pedidos se procesan inmediatamente después del pago
-              - No hacemos despacho a domicilio por ahora, solo retiro en tienda
-
-              PREGUNTAS FRECUENTES:
-              - ¿Cómo compro? → Agrega productos al carrito y paga con Webpay
-              - ¿Cómo veo mis pedidos? → Ve a tu perfil y click en "Mis órdenes"
-              - ¿Puedo devolver un producto? → Sí, tienes 7 días para devoluciones
-              - ¿Cómo contacto soporte? → Por este chat o al email soporte@minishop.cl
-              - ¿Tienen garantía? → Sí, todos los productos tienen 6 meses de garantía
-
-              FUNCIONALIDADES:
-              - Wishlist, reseñas, notificaciones, carrito con cantidades modificables
-
-              INSTRUCCIONES:
-              - Responde siempre en español
-              - Sé amable y breve
-              - Si no sabes algo, di que lo consultarás con el equipo`
-            },
-            ...updatedMessages.filter(msg => msg.role === 'user')
-          ],
-          max_tokens: 500,
-          temperature: 0.7
-        })
+      const response = await api.post('/chat/', {
+        messages: updatedMessages.filter(
+          msg => msg.role === 'user'
+        )
       })
 
-      const data = await response.json()
-      console.log('Respuesta de Groq:', data)
+      const data = response.data
 
-      if (!response.ok) {
-        console.error('Error de Groq:', data)
-        throw new Error(data.error?.message || 'Error desconocido')
+      if (!response.data?.choices?.[0]?.message?.content) {
+        throw new Error('La respuesta del servidor no tiene el formato esperado')
       }
 
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: data.choices[0].message.content
-      }])
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: data.choices[0].message.content
+        }
+      ])
     } catch (err) {
-      console.error('Error completo:', err)
-      setMessages(prev => [...prev, {
-        role: 'assistant',
-        content: 'Lo siento, hubo un error. Por favor intenta de nuevo. 😔'
-      }])
+      console.error('Error en el chat:', err)
+
+      const errorMessage =
+        err.response?.data?.error?.message ||
+        err.response?.data?.error ||
+        'Lo siento, hubo un error. Por favor intenta de nuevo. 😔'
+
+      setMessages(prev => [
+        ...prev,
+        {
+          role: 'assistant',
+          content: errorMessage
+        }
+      ])
     } finally {
       setLoading(false)
     }
@@ -102,24 +86,40 @@ function SupportChat() {
             <div className="w-8 h-8 rounded-full bg-white flex items-center justify-center text-gray-900 text-sm font-bold">
               AI
             </div>
+
             <div>
-              <p className="text-sm font-semibold">Soporte MiniShop</p>
-              <p className="text-xs text-gray-400">Asistente IA · Groq</p>
+              <p className="text-sm font-semibold">
+                Soporte MiniShop
+              </p>
+
+              <p className="text-xs text-gray-400">
+                Asistente IA · Groq
+              </p>
             </div>
           </div>
 
           <div className="flex-1 overflow-y-auto p-4 flex flex-col gap-3 max-h-80">
             {messages.map((msg, index) => (
-              <div key={index} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
+              <div
+                key={index}
+                className={`flex ${
                   msg.role === 'user'
-                    ? 'bg-gray-900 text-white rounded-br-sm'
-                    : 'bg-gray-100 text-gray-700 rounded-bl-sm'
-                }`}>
+                    ? 'justify-end'
+                    : 'justify-start'
+                }`}
+              >
+                <div
+                  className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
+                    msg.role === 'user'
+                      ? 'bg-gray-900 text-white rounded-br-sm'
+                      : 'bg-gray-100 text-gray-700 rounded-bl-sm'
+                  }`}
+                >
                   {msg.content}
                 </div>
               </div>
             ))}
+
             {loading && (
               <div className="flex justify-start">
                 <div className="bg-gray-100 text-gray-400 px-3 py-2 rounded-2xl rounded-bl-sm text-sm">
@@ -127,6 +127,7 @@ function SupportChat() {
                 </div>
               </div>
             )}
+
             <div ref={bottomRef} />
           </div>
 
@@ -143,6 +144,7 @@ function SupportChat() {
                 }
               }}
             />
+
             <button
               onClick={sendMessage}
               disabled={loading}

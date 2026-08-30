@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react'
-import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
 import Toast from '../components/Toast'
 import useToast from '../hooks/useToast'
+import api from '../api'
 
 function Cart() {
   const [items, setItems] = useState([])
@@ -11,52 +11,77 @@ function Cart() {
   const { toast, showToast, hideToast } = useToast()
 
   const fetchCart = useCallback(() => {
-    const headers = { Authorization: `Bearer ${token}` }
-    axios.get('http://127.0.0.1:8000/api/cart/me/', { headers })
+    api.get('/cart/me/')
       .then(res => setItems(res.data))
       .catch(err => console.error(err))
-  }, [token])
+  }, [])
 
   useEffect(() => {
     if (!token) return
+
     fetchCart()
   }, [token, fetchCart])
 
   const updateQuantity = async (id, quantity) => {
     if (quantity < 1) return
-    const headers = { Authorization: `Bearer ${token}` }
-    await axios.patch(`http://127.0.0.1:8000/api/cartitems/${id}/`, { quantity }, { headers })
-    fetchCart()
+
+    try {
+      await api.patch(
+        `/cartitems/${id}/`,
+        { quantity }
+      )
+
+      fetchCart()
+    } catch (err) {
+      console.error('Error al actualizar cantidad:', err)
+    }
   }
 
   const removeItem = async (id) => {
-    const headers = { Authorization: `Bearer ${token}` }
-    await axios.delete(`http://127.0.0.1:8000/api/cartitems/${id}/`, { headers })
-    fetchCart()
-  }
-  
-  const total = items.reduce((sum, item) => sum + parseFloat(item.total), 0)
+    try {
+      await api.delete(`/cartitems/${id}/`)
 
-  if (!token) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="text-center">
-        <p className="text-5xl mb-4">🔒</p>
-        <p className="text-gray-400 mb-4">Debes iniciar sesión para ver tu carrito</p>
-        <button onClick={() => navigate('/login')}
-          className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors">
-          Iniciar sesión
-        </button>
-      </div>
-    </div>
+      fetchCart()
+    } catch (err) {
+      console.error('Error al eliminar producto:', err)
+    }
+  }
+
+  const total = items.reduce(
+    (sum, item) => sum + parseFloat(item.total),
+    0
   )
+
+  if (!token) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-5xl mb-4">🔒</p>
+
+          <p className="text-gray-400 mb-4">
+            Debes iniciar sesión para ver tu carrito
+          </p>
+
+          <button
+            onClick={() => navigate('/login')}
+            className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors"
+          >
+            Iniciar sesión
+          </button>
+        </div>
+      </div>
+    )
+  }
 
   const handlePayment = async () => {
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/payment/create/', {}, {
-        headers: { Authorization: `Bearer ${token}` }
-      })
-      window.location.href = `${res.data.url}?token_ws=${res.data.token}`
-    } catch {
+      const res = await api.post('/payment/create/', {})
+
+      window.location.href =
+        `${res.data.url}?token_ws=${res.data.token}`
+
+    } catch (err) {
+      console.error('Error al iniciar pago:', err)
       showToast('Error al iniciar el pago', 'error')
     }
   }

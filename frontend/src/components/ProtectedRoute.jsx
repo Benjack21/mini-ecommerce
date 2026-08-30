@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import axios from 'axios'
+import api from '../api'
 
 function ProtectedRoute({ children, adminOnly = false }) {
   const [allowed, setAllowed] = useState(!adminOnly)
@@ -12,10 +12,12 @@ function ProtectedRoute({ children, adminOnly = false }) {
       navigate('/login')
       return
     }
-    if (adminOnly) {
-      axios.get('http://127.0.0.1:8000/api/me/', {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+
+    if (!adminOnly) {
+      return
+    }
+
+    api.get('/me/')
       .then(res => {
         if (res.data.is_staff) {
           setAllowed(true)
@@ -23,11 +25,15 @@ function ProtectedRoute({ children, adminOnly = false }) {
           navigate('/')
         }
       })
-      .catch(() => navigate('/login'))
-    }
+      .catch(() => {
+        navigate('/login')
+      })
   }, [token, adminOnly, navigate])
 
-  if (!allowed) return <p className="p-6 text-gray-400">Cargando...</p>
+  if (!allowed) {
+    return <p className="p-6 text-gray-400">Cargando...</p>
+  }
+
   return children
 }
 

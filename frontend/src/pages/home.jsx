@@ -143,7 +143,9 @@ function Home() {
                     </h2>
                     <p className="text-gray-400 text-sm mb-3 line-clamp-2">{product.description}</p>
                     <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold text-gray-900">${product.price}</span>
+                      <span className="text-lg font-bold text-gray-900">
+                        {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(product.price)}
+                      </span>
                       <button
                         onClick={() => addToCart(product.id)}
                         className="bg-gray-900 text-white text-sm px-4 py-2 rounded-xl hover:bg-gray-700 transition-colors"

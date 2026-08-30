@@ -1,22 +1,21 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from .models import Category, Product, CartItem, Order, OrderItem, Review, ProductImage, Wishlist, Notification
-from .serializers import CategorySerializer, ProductSerializer, CartItemSerializer
-
+from pathlib import Path
 from rest_framework import viewsets, status
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
-from django.contrib.auth.models import User
-
-from rest_framework.permissions import IsAuthenticated
-
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAuthenticated
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.authentication import SessionAuthentication
+from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
-
+from django.contrib.auth.models import User
+from django.db.models import Sum
+from decouple import config
 from transbank.webpay.webpay_plus.transaction import Transaction
 from transbank.common.options import WebpayOptions
 from transbank.common.integration_type import IntegrationType
+from django_ratelimit.decorators import ratelimit
+import requests as http_requests
+from .models import Category, Product, CartItem, Order, OrderItem, Review, ProductImage, Wishlist, Notification
+from .serializers import CategorySerializer, ProductSerializer, CartItemSerializer
+
 
 class CategoryViewSet(viewsets.ModelViewSet):
     queryset = Category.objects.all()
@@ -370,3 +369,46 @@ def get_notifications(request):
 def mark_notifications_read(request):
     Notification.objects.filter(user=request.user, read=False).update(read=True)
     return Response({'message': 'Notificaciones marcadas como leídas'})
+
+@api_view(['POST'])
+def groq_chat(request):
+    messages = request.data.get('messages', [])
+    
+    response = http_requests.post(
+        'https://api.groq.com/openai/v1/chat/completions',
+        headers={
+            'Authorization': f'Bearer {config("GROQ_API_KEY")}',
+            'Content-Type': 'application/json'
+        },
+        json={
+            'model': 'llama-3.3-70b-versatile',
+            'messages': [
+                {
+                    'role': 'system',
+                    'content': '''Eres un asistente de soporte de MiniShop, una tienda online chilena.
+
+INFORMACIÓN DE LA TIENDA:
+- Vendemos productos electrónicos y ropa
+- Aceptamos pagos con Webpay (tarjetas de crédito y débito)
+- Los pedidos se procesan inmediatamente después del pago
+- No hacemos despacho a domicilio por ahora, solo retiro en tienda
+
+PREGUNTAS FRECUENTES:
+- ¿Cómo compro? → Agrega productos al carrito y paga con Webpay
+- ¿Cómo veo mis pedidos? → Ve a tu perfil y click en "Mis órdenes"
+- ¿Puedo devolver un producto? → Sí, tienes 7 días para devoluciones
+- ¿Cómo contacto soporte? → Por este chat o al email soporte@minishop.cl
+- ¿Tienen garantía? → Sí, todos los productos tienen 6 meses de garantía
+
+INSTRUCCIONES:
+- Responde siempre en español
+- Sé amable y breve'''
+                },
+                *messages
+            ],
+            'max_tokens': 500,
+            'temperature': 0.7
+        }
+    )
+    
+    return Response(response.json())

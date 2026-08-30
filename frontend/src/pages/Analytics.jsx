@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import axios from 'axios'
 import { useNavigate } from 'react-router-dom'
+import api from '../api'
 import Spinner from '../components/Spinner'
 
 function Analytics() {
@@ -13,12 +13,12 @@ function Analytics() {
       navigate('/login')
       return
     }
-    axios.get('http://127.0.0.1:8000/api/analytics/', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(res => setData(res.data))
-    .catch(() => navigate('/'))
+
+    api.get('/analytics/')
+      .then(res => setData(res.data))
+      .catch(() => navigate('/'))
   }, [token, navigate])
+
 
   if (!data) return <Spinner />
 

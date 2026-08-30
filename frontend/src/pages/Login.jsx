@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import axios from 'axios'
+import api from '../api'
 import { Link, useNavigate } from 'react-router-dom'
 
 function Login() {
@@ -10,7 +10,7 @@ function Login() {
   const handleSubmit = async (e) => {
     e.preventDefault()
     try {
-      const res = await axios.post('http://127.0.0.1:8000/api/token/', form)
+      const res = await api.post('/token/', form)
       localStorage.setItem('token', res.data.access)
       navigate('/')
     } catch {

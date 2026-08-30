@@ -1,0 +1,27 @@
+services:
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+
+    container_name: mini-ecommerce-backend
+
+    ports:
+      - "8000:8000"
+
+    volumes:
+      - ./backend/db.sqlite3:/app/db.sqlite3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+
+    container_name: mini-ecommerce-frontend
+
+    ports:
+      - "5173:80"
+
+    depends_on:
+      - backend

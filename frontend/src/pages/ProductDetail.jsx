@@ -1,8 +1,8 @@
 import { useEffect, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import axios from 'axios'
 import Toast from '../components/Toast'
 import useToast from '../hooks/useToast'
+import api from '../api'
 
 function ProductDetail() {
   const { id } = useParams()
@@ -12,98 +12,138 @@ function ProductDetail() {
   const [added, setAdded] = useState(false)
   const [selectedImage, setSelectedImage] = useState(null)
   const [inWishlist, setInWishlist] = useState(false)
+
   const token = localStorage.getItem('token')
   const navigate = useNavigate()
   const { toast, showToast, hideToast } = useToast()
 
   const fetchReviews = useCallback(() => {
-    axios.get(`http://127.0.0.1:8000/api/products/${id}/reviews/`)
+    api.get(`/products/${id}/reviews/`)
       .then(res => setReviews(res.data))
-      .catch(err => console.error(err))
+      .catch(err => console.error('Error al obtener reseñas:', err))
   }, [id])
 
   useEffect(() => {
-    axios.get(`http://127.0.0.1:8000/api/products/${id}/`)
+    api.get(`/products/${id}/`)
       .then(res => {
         setProduct(res.data)
         setSelectedImage(res.data.image_url)
       })
-      .catch(err => console.error(err))
+      .catch(err => console.error('Error al obtener producto:', err))
+
     fetchReviews()
   }, [id, fetchReviews])
 
   useEffect(() => {
     if (!token) return
-    axios.get('http://127.0.0.1:8000/api/wishlist/', {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    .then(res => {
-      const found = res.data.some(item => item.product_id === parseInt(id))
-      setInWishlist(found)
-    })
-    .catch(err => console.error(err))
+
+    api.get('/wishlist/')
+      .then(res => {
+        const found = res.data.some(
+          item => item.product_id === parseInt(id)
+        )
+
+        setInWishlist(found)
+      })
+      .catch(err => console.error('Error al obtener wishlist:', err))
   }, [id, token])
 
   const addToCart = async () => {
-    if (!token) { navigate('/login'); return }
+    if (!token) {
+      navigate('/login')
+      return
+    }
+
     try {
-      await axios.post('http://127.0.0.1:8000/api/cart/add/',
-        { product_id: id, quantity: 1 },
-        { headers: { Authorization: `Bearer ${token}` } }
-      )
+      await api.post('/cart/add/', {
+        product_id: id,
+        quantity: 1
+      })
+
       setAdded(true)
       showToast('¡Agregado al carrito!')
+
       setTimeout(() => setAdded(false), 2000)
-    } catch {
+    } catch (err) {
+      console.error('Error al agregar al carrito:', err)
       showToast('Error al agregar al carrito', 'error')
     }
   }
 
   const toggleWishlist = async () => {
-    if (!token) { navigate('/login'); return }
+    if (!token) {
+      navigate('/login')
+      return
+    }
+
     try {
       if (inWishlist) {
-        await axios.delete('http://127.0.0.1:8000/api/wishlist/',
-          { data: { product_id: id }, headers: { Authorization: `Bearer ${token}` } }
-        )
+        await api.delete('/wishlist/', {
+          data: {
+            product_id: id
+          }
+        })
+
         setInWishlist(false)
         showToast('Eliminado de tu wishlist')
       } else {
-        await axios.post('http://127.0.0.1:8000/api/wishlist/',
-          { product_id: id },
-          { headers: { Authorization: `Bearer ${token}` } }
-        )
+        await api.post('/wishlist/', {
+          product_id: id
+        })
+
         setInWishlist(true)
         showToast('¡Agregado a tu wishlist!')
       }
-    } catch {
+    } catch (err) {
+      console.error('Error al actualizar wishlist:', err)
       showToast('Error al actualizar wishlist', 'error')
     }
   }
 
   const submitReview = async () => {
-    if (!token) { navigate('/login'); return }
+    if (!token) {
+      navigate('/login')
+      return
+    }
+
     try {
-      await axios.post(`http://127.0.0.1:8000/api/products/${id}/reviews/`,
-        form,
-        { headers: { Authorization: `Bearer ${token}` } }
+      await api.post(
+        `/products/${id}/reviews/`,
+        form
       )
+
       showToast('¡Reseña publicada!')
-      setForm({ rating: 5, comment: '' })
+
+      setForm({
+        rating: 5,
+        comment: ''
+      })
+
       fetchReviews()
     } catch (err) {
-      showToast(err.response?.data?.error || 'Error al publicar reseña', 'error')
+      showToast(
+        err.response?.data?.error ||
+        'Error al publicar reseña',
+        'error'
+      )
     }
   }
 
   if (!product) return (
     <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <p className="text-gray-400">Cargando producto...</p>
+      <p className="text-gray-400">
+        Cargando producto...
+      </p>
     </div>
   )
 
   const avgRating = reviews.length
-    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+    ? (
+        reviews.reduce(
+          (sum, r) => sum + r.rating,
+          0
+        ) / reviews.length
+      ).toFixed(1)
     : null
 
   return (
@@ -172,7 +212,9 @@ function ProductDetail() {
                 )}
                 <p className="text-gray-400 text-sm leading-relaxed mb-6">{product.description}</p>
                 <div className="flex items-center gap-4 mb-6">
-                  <span className="text-3xl font-bold text-gray-900">${product.price}</span>
+                  <span className="text-3xl font-bold text-gray-900">
+                    {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(product.price)}
+                  </span>
                   <span className={`text-sm px-3 py-1 rounded-full ${
                     product.stock > 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'
                   }`}>
