@@ -1,0 +1,32 @@
+@layer components {
+
+  /* Layout */
+  .notfound-wrapper {
+    @apply min-h-screen bg-gray-50 flex items-center justify-center px-6;
+  }
+  .notfound-inner {
+    @apply text-center;
+  }
+
+  /* Contenido */
+  .notfound-code {
+    @apply text-8xl font-bold text-gray-900 mb-4;
+  }
+  .notfound-title {
+    @apply text-2xl font-bold text-gray-900 mb-2;
+  }
+  .notfound-text {
+    @apply text-gray-400 mb-8;
+  }
+
+  /* Acciones */
+  .notfound-actions {
+    @apply flex gap-3 justify-center;
+  }
+  .notfound-btn-back {
+    @apply border border-gray-200 text-gray-500 px-6 py-2 rounded-xl text-sm hover:bg-gray-100 transition-colors;
+  }
+  .notfound-btn-home {
+    @apply bg-gray-900 text-white px-6 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors;
+  }
+}

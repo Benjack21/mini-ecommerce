@@ -1,0 +1,135 @@
+@layer components {
+
+  /* Layout */
+  .admin-wrapper {
+    @apply min-h-screen bg-gray-50 px-6 py-10;
+  }
+  .admin-container {
+    @apply max-w-4xl mx-auto;
+  }
+
+  /* Header */
+  .admin-header {
+    @apply flex justify-between items-center mb-8;
+  }
+  .admin-header__title {
+    @apply text-2xl font-bold text-gray-900;
+  }
+  .admin-header__actions {
+    @apply flex gap-3;
+  }
+  .admin-btn-analytics {
+    @apply border border-gray-200 text-gray-600 px-5 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition-colors;
+  }
+  .admin-btn-new {
+    @apply bg-gray-900 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors;
+  }
+
+  /* Formulario */
+  .admin-form {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6;
+  }
+  .admin-form__title {
+    @apply font-semibold text-gray-900 mb-5;
+  }
+  .admin-form__grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+  }
+  .admin-form__input {
+    @apply border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300;
+  }
+  .admin-form__input--full {
+    @apply border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 sm:col-span-2;
+  }
+  .admin-form__textarea {
+    @apply border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 sm:col-span-2;
+  }
+  .admin-form__footer {
+    @apply flex gap-3 mt-5;
+  }
+  .admin-btn-save {
+    @apply bg-gray-900 text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors;
+  }
+  .admin-btn-cancel {
+    @apply border border-gray-200 text-gray-500 px-6 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors;
+  }
+
+  /* Panel imágenes */
+  .admin-images {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6;
+  }
+  .admin-images__header {
+    @apply flex justify-between items-center mb-4;
+  }
+  .admin-images__title {
+    @apply font-semibold text-gray-900;
+  }
+  .admin-images__close {
+    @apply text-gray-400 hover:text-gray-700 text-sm;
+  }
+  .admin-images__list {
+    @apply flex flex-col gap-3 mb-4;
+  }
+  .admin-images__item {
+    @apply flex items-center gap-3 border border-gray-100 rounded-xl p-3;
+  }
+  .admin-images__preview {
+    @apply w-16 h-16 object-cover rounded-xl shrink-0;
+  }
+  .admin-images__input {
+    @apply border border-gray-200 rounded-xl px-3 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-gray-300;
+  }
+  .admin-images__btn-delete {
+    @apply text-red-400 hover:text-red-600 border border-red-200 px-3 py-2 rounded-xl text-sm hover:bg-red-50 transition-colors shrink-0;
+  }
+  .admin-images__footer {
+    @apply flex gap-3 border-t border-gray-100 pt-4;
+  }
+  .admin-images__url-input {
+    @apply border border-gray-200 rounded-xl px-4 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-gray-300;
+  }
+  .admin-images__btn-add {
+    @apply bg-gray-900 text-white px-5 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors;
+  }
+
+  /* Lista productos */
+  .admin-list {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden;
+  }
+  .admin-list__empty {
+    @apply text-center py-16 text-gray-400;
+  }
+  .admin-list__empty-icon {
+    @apply text-4xl mb-3;
+  }
+  .admin-list__empty-text {
+    @apply text-sm;
+  }
+  .admin-list__item {
+    @apply flex items-center justify-between px-6 py-4;
+  }
+  .admin-list__item--border {
+    @apply border-b border-gray-100;
+  }
+  .admin-list__item-left {
+    @apply flex items-center gap-4;
+  }
+  .admin-list__item-image {
+    @apply w-12 h-12 rounded-xl object-cover bg-gray-100;
+  }
+  .admin-list__item-name {
+    @apply text-sm font-medium text-gray-900;
+  }
+  .admin-list__item-meta {
+    @apply text-xs text-gray-400;
+  }
+  .admin-list__item-actions {
+    @apply flex gap-2;
+  }
+  .admin-btn-images {
+    @apply text-sm border border-gray-200 px-4 py-1.5 rounded-xl hover:bg-gray-50 transition-colors;
+  }
+  .admin-btn-edit {
+    @apply text-sm border border-gray-200 px-4 py-1.5 rounded-xl hover:bg-gray-50 transition-colors;
+  }
+  .admin-btn-delete

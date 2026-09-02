@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api'
 import Spinner from '../components/Spinner'
+import '../styles/Analytics.css'
 
 function Analytics() {
   const [data, setData] = useState(null)
@@ -13,59 +14,57 @@ function Analytics() {
       navigate('/login')
       return
     }
-
     api.get('/analytics/')
       .then(res => setData(res.data))
       .catch(() => navigate('/'))
   }, [token, navigate])
 
-
   if (!data) return <Spinner />
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="max-w-5xl mx-auto">
+    <div className="analytics-wrapper">
+      <div className="analytics-container">
 
-        <div className="flex items-center gap-4 mb-8">
-          <button onClick={() => navigate('/admin-panel')}
-            className="text-sm text-gray-400 hover:text-gray-900 transition-colors">
+        {/* Header */}
+        <div className="analytics-header">
+          <button onClick={() => navigate('/admin-panel')} className="analytics-header__back">
             ← Volver
           </button>
-          <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+          <h1 className="analytics-header__title">Dashboard</h1>
         </div>
 
         {/* Stats */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+        <div className="analytics-stats">
           {[
             { label: 'Productos', value: data.total_products, icon: '📦' },
             { label: 'Usuarios', value: data.total_users, icon: '👤' },
             { label: 'Órdenes', value: data.total_orders, icon: '🧾' },
             { label: 'Ingresos', value: `$${parseFloat(data.total_revenue).toFixed(2)}`, icon: '💰' },
           ].map(stat => (
-            <div key={stat.label} className="bg-white rounded-2xl border border-gray-100 shadow-sm p-5">
-              <p className="text-3xl mb-2">{stat.icon}</p>
-              <p className="text-2xl font-bold text-gray-900">{stat.value}</p>
-              <p className="text-gray-400 text-sm">{stat.label}</p>
+            <div key={stat.label} className="analytics-stat-card">
+              <p className="analytics-stat-card__icon">{stat.icon}</p>
+              <p className="analytics-stat-card__value">{stat.value}</p>
+              <p className="analytics-stat-card__label">{stat.label}</p>
             </div>
           ))}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="analytics-panels">
 
           {/* Top productos */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <h2 className="font-bold text-gray-900 mb-4">🏆 Productos más vendidos</h2>
+          <div className="analytics-panel">
+            <h2 className="analytics-panel__title">🏆 Productos más vendidos</h2>
             {data.top_products.length === 0 ? (
-              <p className="text-gray-400 text-sm">Aún no hay ventas</p>
+              <p className="analytics-panel__empty">Aún no hay ventas</p>
             ) : (
               <div>
                 {data.top_products.map((product, index) => (
-                  <div key={index} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
-                    <div className="flex items-center gap-3">
-                      <span className="text-gray-400 text-sm font-medium w-5">#{index + 1}</span>
-                      <span className="text-sm text-gray-700">{product.product__name}</span>
+                  <div key={index} className="analytics-row">
+                    <div className="analytics-product__left">
+                      <span className="analytics-product__rank">#{index + 1}</span>
+                      <span className="analytics-product__name">{product.product__name}</span>
                     </div>
-                    <span className="text-sm font-semibold text-gray-900">{product.total_sold} vendidos</span>
+                    <span className="analytics-row__value">{product.total_sold} vendidos</span>
                   </div>
                 ))}
               </div>
@@ -73,19 +72,19 @@ function Analytics() {
           </div>
 
           {/* Órdenes recientes */}
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
-            <h2 className="font-bold text-gray-900 mb-4">🕐 Órdenes recientes</h2>
+          <div className="analytics-panel">
+            <h2 className="analytics-panel__title">🕐 Órdenes recientes</h2>
             {data.recent_orders.length === 0 ? (
-              <p className="text-gray-400 text-sm">Aún no hay órdenes</p>
+              <p className="analytics-panel__empty">Aún no hay órdenes</p>
             ) : (
               <div>
                 {data.recent_orders.map(order => (
-                  <div key={order.id} className="flex justify-between items-center py-3 border-b border-gray-100 last:border-0">
+                  <div key={order.id} className="analytics-row">
                     <div>
-                      <p className="text-sm font-medium text-gray-900">{order.user}</p>
-                      <p className="text-xs text-gray-400">{order.created_at}</p>
+                      <p className="analytics-order__user">{order.user}</p>
+                      <p className="analytics-order__date">{order.created_at}</p>
                     </div>
-                    <span className="text-sm font-semibold text-gray-900">${order.total}</span>
+                    <span className="analytics-row__value">${order.total}</span>
                   </div>
                 ))}
               </div>

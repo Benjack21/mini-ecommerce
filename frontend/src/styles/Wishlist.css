@@ -1,0 +1,58 @@
+@layer components {
+
+  /* Layout */
+  .wishlist-wrapper {
+    @apply min-h-screen bg-gray-50 px-6 py-10;
+  }
+  .wishlist-container {
+    @apply max-w-3xl mx-auto;
+  }
+  .wishlist-title {
+    @apply text-2xl font-bold text-gray-900 mb-8;
+  }
+
+  /* Empty */
+  .wishlist-empty {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm text-center py-20;
+  }
+  .wishlist-empty__icon {
+    @apply text-5xl mb-4;
+  }
+  .wishlist-empty__text {
+    @apply text-gray-400 mb-6;
+  }
+  .wishlist-empty__btn {
+    @apply bg-gray-900 text-white px-6 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors;
+  }
+
+  /* Grid */
+  .wishlist-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-4;
+  }
+
+  /* Card */
+  .wishlist-card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden;
+  }
+  .wishlist-card__img {
+    @apply w-full h-48 object-cover cursor-pointer;
+  }
+  .wishlist-card__body {
+    @apply p-4;
+  }
+  .wishlist-card__name {
+    @apply font-semibold text-gray-900 mb-1 cursor-pointer hover:text-gray-600;
+  }
+  .wishlist-card__price {
+    @apply text-blue-600 font-bold mb-3;
+  }
+  .wishlist-card__actions {
+    @apply flex gap-2;
+  }
+  .wishlist-card__btn-cart {
+    @apply flex-1 bg-gray-900 text-white py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors;
+  }
+  .wishlist-card__btn-remove {
+    @apply border border-red-200 text-red-400 px-4 py-2 rounded-xl text-sm hover:bg-red-50 transition-colors;
+  }
+}

@@ -1,0 +1,45 @@
+@layer components {
+
+  /* Layout */
+  .login-wrapper {
+    @apply min-h-screen bg-gray-50 flex items-center justify-center px-4;
+  }
+  .login-card {
+    @apply bg-white w-full max-w-sm rounded-2xl shadow-sm border border-gray-100 p-8;
+  }
+
+  /* Header */
+  .login-header {
+    @apply text-center mb-8;
+  }
+  .login-header__title {
+    @apply text-2xl font-bold text-gray-900;
+  }
+  .login-header__subtitle {
+    @apply text-gray-400 text-sm mt-1;
+  }
+
+  /* Error */
+  .login-error {
+    @apply bg-red-50 text-red-500 text-sm px-4 py-3 rounded-xl mb-4;
+  }
+
+  /* Formulario */
+  .login-form {
+    @apply flex flex-col gap-3;
+  }
+  .login-form__input {
+    @apply border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300;
+  }
+  .login-form__btn {
+    @apply bg-gray-900 text-white py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors mt-2;
+  }
+
+  /* Footer */
+  .login-footer {
+    @apply text-center text-sm text-gray-400 mt-6;
+  }
+  .login-footer__link {
+    @apply text-gray-900 font-medium hover:underline;
+  }
+}

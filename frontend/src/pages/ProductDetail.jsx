@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import Toast from '../components/Toast'
 import useToast from '../hooks/useToast'
 import api from '../api'
+import '../styles/ProductDetail.css'
 
 function ProductDetail() {
   const { id } = useParams()
@@ -30,39 +31,25 @@ function ProductDetail() {
         setSelectedImage(res.data.image_url)
       })
       .catch(err => console.error('Error al obtener producto:', err))
-
     fetchReviews()
   }, [id, fetchReviews])
 
   useEffect(() => {
     if (!token) return
-
     api.get('/wishlist/')
       .then(res => {
-        const found = res.data.some(
-          item => item.product_id === parseInt(id)
-        )
-
+        const found = res.data.some(item => item.product_id === parseInt(id))
         setInWishlist(found)
       })
       .catch(err => console.error('Error al obtener wishlist:', err))
   }, [id, token])
 
   const addToCart = async () => {
-    if (!token) {
-      navigate('/login')
-      return
-    }
-
+    if (!token) { navigate('/login'); return }
     try {
-      await api.post('/cart/add/', {
-        product_id: id,
-        quantity: 1
-      })
-
+      await api.post('/cart/add/', { product_id: id, quantity: 1 })
       setAdded(true)
       showToast('¡Agregado al carrito!')
-
       setTimeout(() => setAdded(false), 2000)
     } catch (err) {
       console.error('Error al agregar al carrito:', err)
@@ -71,26 +58,14 @@ function ProductDetail() {
   }
 
   const toggleWishlist = async () => {
-    if (!token) {
-      navigate('/login')
-      return
-    }
-
+    if (!token) { navigate('/login'); return }
     try {
       if (inWishlist) {
-        await api.delete('/wishlist/', {
-          data: {
-            product_id: id
-          }
-        })
-
+        await api.delete('/wishlist/', { data: { product_id: id } })
         setInWishlist(false)
         showToast('Eliminado de tu wishlist')
       } else {
-        await api.post('/wishlist/', {
-          product_id: id
-        })
-
+        await api.post('/wishlist/', { product_id: id })
         setInWishlist(true)
         showToast('¡Agregado a tu wishlist!')
       }
@@ -101,100 +76,73 @@ function ProductDetail() {
   }
 
   const submitReview = async () => {
-    if (!token) {
-      navigate('/login')
-      return
-    }
-
+    if (!token) { navigate('/login'); return }
     try {
-      await api.post(
-        `/products/${id}/reviews/`,
-        form
-      )
-
+      await api.post(`/products/${id}/reviews/`, form)
       showToast('¡Reseña publicada!')
-
-      setForm({
-        rating: 5,
-        comment: ''
-      })
-
+      setForm({ rating: 5, comment: '' })
       fetchReviews()
     } catch (err) {
-      showToast(
-        err.response?.data?.error ||
-        'Error al publicar reseña',
-        'error'
-      )
+      showToast(err.response?.data?.error || 'Error al publicar reseña', 'error')
     }
   }
 
   if (!product) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <p className="text-gray-400">
-        Cargando producto...
-      </p>
+    <div className="product-loading">
+      <p className="product-loading__text">Cargando producto...</p>
     </div>
   )
 
   const avgRating = reviews.length
-    ? (
-        reviews.reduce(
-          (sum, r) => sum + r.rating,
-          0
-        ) / reviews.length
-      ).toFixed(1)
+    ? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
     : null
 
+  const allImages = product.images?.length
+    ? [product.image_url, ...product.images.map(img => img.url)]
+    : []
+
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-10">
+    <div className="product-wrapper">
       {toast && <Toast message={toast.message} type={toast.type} onClose={hideToast} />}
 
-      <div className="max-w-4xl mx-auto">
-        <button onClick={() => navigate('/')}
-          className="text-sm text-gray-400 hover:text-gray-900 transition-colors mb-8 flex items-center gap-1">
+      <div className="product-container">
+        <button onClick={() => navigate('/')} className="product-back">
           ← Volver a productos
         </button>
 
-        {/* Producto */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8">
-          <div className="flex flex-col sm:flex-row">
+        {/* Card producto */}
+        <div className="product-card">
+          <div className="product-card__inner">
 
-            {/* Galería con carrusel */}
-            <div className="w-full sm:w-1/2 relative">
+            {/* Galería */}
+            <div className="product-gallery">
               <img
                 src={selectedImage || product.image_url}
                 alt={product.name}
-                className="w-full h-80 object-cover"
+                className="product-gallery__img"
               />
-              {product.images && product.images.length > 0 && (
+              {allImages.length > 0 && (
                 <>
                   <button
+                    className="product-gallery__prev"
                     onClick={() => {
-                      const allImages = [product.image_url, ...product.images.map(img => img.url)]
-                      const currentIndex = allImages.indexOf(selectedImage)
-                      const prevIndex = (currentIndex - 1 + allImages.length) % allImages.length
-                      setSelectedImage(allImages[prevIndex])
+                      const i = allImages.indexOf(selectedImage)
+                      setSelectedImage(allImages[(i - 1 + allImages.length) % allImages.length])
                     }}
-                    className="absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 w-8 h-8 rounded-full flex items-center justify-center shadow transition-all"
                   >←</button>
                   <button
+                    className="product-gallery__next"
                     onClick={() => {
-                      const allImages = [product.image_url, ...product.images.map(img => img.url)]
-                      const currentIndex = allImages.indexOf(selectedImage)
-                      const nextIndex = (currentIndex + 1) % allImages.length
-                      setSelectedImage(allImages[nextIndex])
+                      const i = allImages.indexOf(selectedImage)
+                      setSelectedImage(allImages[(i + 1) % allImages.length])
                     }}
-                    className="absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 w-8 h-8 rounded-full flex items-center justify-center shadow transition-all"
                   >→</button>
-                  <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5">
-                    {[product.image_url, ...product.images.map(img => img.url)].map((img, index) => (
+                  <div className="product-gallery__dots">
+                    {allImages.map((img, index) => (
                       <button
                         key={index}
                         onClick={() => setSelectedImage(img)}
-                        className={`w-2 h-2 rounded-full transition-all ${
-                          selectedImage === img ? 'bg-white w-4' : 'bg-white bg-opacity-50'
-                        }`}
+                        className={`product-gallery__dot ${selectedImage === img ? 'product-gallery__dot--active' : ''}`}
                       />
                     ))}
                   </div>
@@ -202,44 +150,39 @@ function ProductDetail() {
               )}
             </div>
 
-            <div className="p-8 flex flex-col justify-between w-full">
+            {/* Info */}
+            <div className="product-info">
               <div>
-                <h1 className="text-2xl font-bold text-gray-900 mb-2">{product.name}</h1>
+                <h1 className="product-info__name">{product.name}</h1>
                 {avgRating && (
-                  <p className="text-yellow-500 text-sm mb-3">
+                  <p className="product-info__rating">
                     {'⭐'.repeat(Math.round(avgRating))} {avgRating} ({reviews.length} reseñas)
                   </p>
                 )}
-                <p className="text-gray-400 text-sm leading-relaxed mb-6">{product.description}</p>
-                <div className="flex items-center gap-4 mb-6">
-                  <span className="text-3xl font-bold text-gray-900">
+                <p className="product-info__description">{product.description}</p>
+                <div className="product-info__price-row">
+                  <span className="product-info__price">
                     {new Intl.NumberFormat('es-CL', { style: 'currency', currency: 'CLP' }).format(product.price)}
                   </span>
-                  <span className={`text-sm px-3 py-1 rounded-full ${
-                    product.stock > 0 ? 'bg-green-50 text-green-600' : 'bg-red-50 text-red-500'
-                  }`}>
+                  <span className={product.stock > 0 ? 'product-info__stock--available' : 'product-info__stock--empty'}>
                     {product.stock > 0 ? `${product.stock} disponibles` : 'Sin stock'}
                   </span>
                 </div>
               </div>
-              <div className="flex gap-3">
+              <div className="product-info__actions">
                 <button
                   onClick={toggleWishlist}
-                  className={`px-4 py-3 rounded-xl text-sm font-medium border transition-colors ${
-                    inWishlist
-                      ? 'border-red-300 text-red-400 hover:bg-red-50'
-                      : 'border-gray-200 text-gray-500 hover:bg-gray-50'
-                  }`}
+                  className={`product-btn-wishlist ${inWishlist ? 'product-btn-wishlist--active' : 'product-btn-wishlist--inactive'}`}
                 >
                   {inWishlist ? '❤️' : '🤍'}
                 </button>
                 <button
                   onClick={addToCart}
                   disabled={product.stock === 0}
-                  className={`flex-1 py-3 rounded-xl text-sm font-medium transition-colors ${
-                    added ? 'bg-green-500 text-white'
-                    : product.stock === 0 ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-900 text-white hover:bg-gray-700'
+                  className={`product-btn-cart ${
+                    added ? 'product-btn-cart--added'
+                    : product.stock === 0 ? 'product-btn-cart--disabled'
+                    : 'product-btn-cart--default'
                   }`}
                 >
                   {added ? '✓ Agregado al carrito' : 'Agregar al carrito'}
@@ -250,48 +193,52 @@ function ProductDetail() {
         </div>
 
         {/* Reseñas */}
-        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6">
-          <h2 className="text-lg font-bold text-gray-900 mb-6">Reseñas</h2>
+        <div className="reviews-card">
+          <h2 className="reviews-card__title">Reseñas</h2>
+
           {reviews.length === 0 ? (
-            <p className="text-gray-400 text-sm mb-6">Aún no hay reseñas. ¡Sé el primero!</p>
+            <p className="reviews-card__empty">Aún no hay reseñas. ¡Sé el primero!</p>
           ) : (
-            <div className="flex flex-col gap-4 mb-6">
+            <div className="reviews-list">
               {reviews.map(review => (
-                <div key={review.id} className="border-b border-gray-100 pb-4">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="font-medium text-sm text-gray-900">{review.user}</span>
-                    <span className="text-xs text-gray-400">{review.created_at}</span>
+                <div key={review.id} className="review-item">
+                  <div className="review-item__header">
+                    <span className="review-item__user">{review.user}</span>
+                    <span className="review-item__date">{review.created_at}</span>
                   </div>
-                  <p className="text-yellow-500 text-sm mb-1">{'⭐'.repeat(review.rating)}</p>
-                  <p className="text-gray-500 text-sm">{review.comment}</p>
+                  <p className="review-item__stars">{'⭐'.repeat(review.rating)}</p>
+                  <p className="review-item__comment">{review.comment}</p>
                 </div>
               ))}
             </div>
           )}
+
           {token ? (
-            <div className="border-t border-gray-100 pt-6">
-              <h3 className="text-sm font-semibold text-gray-900 mb-4">Escribir reseña</h3>
-              <div className="flex gap-2 mb-3">
+            <div className="review-form">
+              <h3 className="review-form__title">Escribir reseña</h3>
+              <div className="review-form__stars">
                 {[1, 2, 3, 4, 5].map(star => (
-                  <button key={star} onClick={() => setForm({...form, rating: star})}
-                    className={`text-2xl transition-transform hover:scale-110 ${
-                      star <= form.rating ? 'text-yellow-400' : 'text-gray-200'
-                    }`}>⭐</button>
+                  <button
+                    key={star}
+                    onClick={() => setForm({...form, rating: star})}
+                    className={`review-form__star ${star <= form.rating ? 'review-form__star--active' : 'review-form__star--inactive'}`}
+                  >⭐</button>
                 ))}
               </div>
-              <textarea rows={3} placeholder="Escribe tu opinión..."
+              <textarea
+                rows={3}
+                placeholder="Escribe tu opinión..."
                 value={form.comment}
                 onChange={e => setForm({...form, comment: e.target.value})}
-                className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 mb-3"
+                className="review-form__textarea"
               />
-              <button onClick={submitReview}
-                className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors">
+              <button onClick={submitReview} className="review-form__btn">
                 Publicar reseña
               </button>
             </div>
           ) : (
-            <p className="text-sm text-gray-400 border-t border-gray-100 pt-4">
-              <button onClick={() => navigate('/login')} className="text-gray-900 font-medium hover:underline">
+            <p className="review-login">
+              <button onClick={() => navigate('/login')} className="review-login__link">
                 Inicia sesión
               </button> para dejar una reseña.
             </p>

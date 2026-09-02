@@ -1,31 +1,31 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api'
+import '../styles/AdminPanel.css'
 
 function AdminPanel() {
   const [products, setProducts] = useState([])
   const [form, setForm] = useState({
-    name: '',
-    description: '',
-    price: '',
-    stock: '',
-    image_url: '',
-    category: ''
+    name: '', description: '', price: '', stock: '', image_url: '', category: ''
   })
   const [editingId, setEditingId] = useState(null)
   const [showForm, setShowForm] = useState(false)
+  const [imageUrl, setImageUrl] = useState('')
+  const [selectedProductId, setSelectedProductId] = useState(null)
+  const [productImages, setProductImages] = useState([])
+  const navigate = useNavigate()
+
+  const resetForm = () => ({
+    name: '', description: '', price: '', stock: '', image_url: '', category: ''
+  })
 
   const fetchProducts = () => {
     api.get('/products/')
       .then(res => setProducts(res.data))
-      .catch(err => {
-        console.error('Error al obtener productos:', err)
-      })
+      .catch(err => console.error('Error al obtener productos:', err))
   }
 
-  useEffect(() => {
-    fetchProducts()
-  }, [])
+  useEffect(() => { fetchProducts() }, [])
 
   const handleSave = async () => {
     try {
@@ -34,16 +34,7 @@ function AdminPanel() {
       } else {
         await api.post('/products/', form)
       }
-
-      setForm({
-        name: '',
-        description: '',
-        price: '',
-        stock: '',
-        image_url: '',
-        category: ''
-      })
-
+      setForm(resetForm())
       setEditingId(null)
       setShowForm(false)
       fetchProducts()
@@ -60,7 +51,6 @@ function AdminPanel() {
 
   const handleDelete = async (id) => {
     if (!window.confirm('¿Eliminar este producto?')) return
-
     try {
       await api.delete(`/products/${id}/`)
       fetchProducts()
@@ -70,24 +60,10 @@ function AdminPanel() {
   }
 
   const handleCancel = () => {
-    setForm({
-      name: '',
-      description: '',
-      price: '',
-      stock: '',
-      image_url: '',
-      category: ''
-    })
-
+    setForm(resetForm())
     setEditingId(null)
     setShowForm(false)
   }
-
-  const navigate = useNavigate()
-
-  const [imageUrl, setImageUrl] = useState('')
-  const [selectedProductId, setSelectedProductId] = useState(null)
-  const [productImages, setProductImages] = useState([])
 
   const fetchImages = async (productId) => {
     try {
@@ -101,13 +77,8 @@ function AdminPanel() {
 
   const addImage = async () => {
     if (!imageUrl) return
-
     try {
-      await api.post(
-        `/products/${selectedProductId}/images/`,
-        { url: imageUrl }
-      )
-
+      await api.post(`/products/${selectedProductId}/images/`, { url: imageUrl })
       setImageUrl('')
       fetchImages(selectedProductId)
     } catch (err) {
@@ -117,13 +88,7 @@ function AdminPanel() {
 
   const deleteImage = async (imageId) => {
     try {
-      await api.delete(
-        `/products/${selectedProductId}/images/`,
-        {
-          data: { image_id: imageId }
-        }
-      )
-
+      await api.delete(`/products/${selectedProductId}/images/`, { data: { image_id: imageId } })
       fetchImages(selectedProductId)
     } catch (err) {
       console.error('Error al eliminar imagen:', err)
@@ -132,14 +97,7 @@ function AdminPanel() {
 
   const updateImage = async (imageId, newUrl) => {
     try {
-      await api.patch(
-        `/products/${selectedProductId}/images/`,
-        {
-          image_id: imageId,
-          url: newUrl
-        }
-      )
-
+      await api.patch(`/products/${selectedProductId}/images/`, { image_id: imageId, url: newUrl })
       fetchImages(selectedProductId)
     } catch (err) {
       console.error('Error al actualizar imagen:', err)
@@ -147,24 +105,18 @@ function AdminPanel() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="max-w-4xl mx-auto">
+    <div className="admin-wrapper">
+      <div className="admin-container">
 
         {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Panel de Administración</h1>
-          <div className="flex gap-3">
-            <button
-              onClick={() => navigate('/analytics')}
-              className="border border-gray-200 text-gray-600 px-5 py-2 rounded-xl text-sm font-medium hover:bg-gray-100 transition-colors"
-            >
+        <div className="admin-header">
+          <h1 className="admin-header__title">Panel de Administración</h1>
+          <div className="admin-header__actions">
+            <button onClick={() => navigate('/analytics')} className="admin-btn-analytics">
               📊 Ver analytics
             </button>
             {!showForm && (
-              <button
-                onClick={() => setShowForm(true)}
-                className="bg-gray-900 text-white px-5 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors"
-              >
+              <button onClick={() => setShowForm(true)} className="admin-btn-new">
                 + Nuevo producto
               </button>
             )}
@@ -173,162 +125,97 @@ function AdminPanel() {
 
         {/* Formulario */}
         {showForm && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-            <h2 className="font-semibold text-gray-900 mb-5">
+          <div className="admin-form">
+            <h2 className="admin-form__title">
               {editingId ? 'Editar producto' : 'Nuevo producto'}
             </h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <input
-                className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
-                placeholder="Nombre"
-                value={form.name}
-                onChange={e => setForm({...form, name: e.target.value})}
-              />
-              <input
-                className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
-                placeholder="Precio"
-                value={form.price}
-                onChange={e => setForm({...form, price: e.target.value})}
-              />
-              <input
-                className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
-                placeholder="Stock"
-                value={form.stock}
-                onChange={e => setForm({...form, stock: e.target.value})}
-              />
-              <input
-                className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
-                placeholder="ID de categoría"
-                value={form.category}
-                onChange={e => setForm({...form, category: e.target.value})}
-              />
-              <input
-                className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 sm:col-span-2"
-                placeholder="URL de imagen"
-                value={form.image_url}
-                onChange={e => setForm({...form, image_url: e.target.value})}
-              />
-              <textarea
-                className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 sm:col-span-2"
-                placeholder="Descripción"
-                rows={3}
-                value={form.description}
-                onChange={e => setForm({...form, description: e.target.value})}
-              />
+            <div className="admin-form__grid">
+              <input className="admin-form__input" placeholder="Nombre"
+                value={form.name} onChange={e => setForm({...form, name: e.target.value})} />
+              <input className="admin-form__input" placeholder="Precio"
+                value={form.price} onChange={e => setForm({...form, price: e.target.value})} />
+              <input className="admin-form__input" placeholder="Stock"
+                value={form.stock} onChange={e => setForm({...form, stock: e.target.value})} />
+              <input className="admin-form__input" placeholder="ID de categoría"
+                value={form.category} onChange={e => setForm({...form, category: e.target.value})} />
+              <input className="admin-form__input--full" placeholder="URL de imagen"
+                value={form.image_url} onChange={e => setForm({...form, image_url: e.target.value})} />
+              <textarea className="admin-form__textarea" placeholder="Descripción" rows={3}
+                value={form.description} onChange={e => setForm({...form, description: e.target.value})} />
             </div>
-            <div className="flex gap-3 mt-5">
-              <button
-                onClick={handleSave}
-                className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors"
-              >
+            <div className="admin-form__footer">
+              <button onClick={handleSave} className="admin-btn-save">
                 {editingId ? 'Guardar cambios' : 'Crear producto'}
               </button>
-              <button
-                onClick={handleCancel}
-                className="border border-gray-200 text-gray-500 px-6 py-2 rounded-xl text-sm font-medium hover:bg-gray-50 transition-colors"
-              >
-                Cancelar
-              </button>
+              <button onClick={handleCancel} className="admin-btn-cancel">Cancelar</button>
             </div>
           </div>
         )}
-        {/*panel de imagenes*/}
+
+        {/* Panel imágenes */}
         {selectedProductId && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 mb-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="font-semibold text-gray-900">
-                Imágenes del producto #{selectedProductId}
-              </h2>
-              <button
-                onClick={() => setSelectedProductId(null)}
-                className="text-gray-400 hover:text-gray-700 text-sm"
-              >
+          <div className="admin-images">
+            <div className="admin-images__header">
+              <h2 className="admin-images__title">Imágenes del producto #{selectedProductId}</h2>
+              <button onClick={() => setSelectedProductId(null)} className="admin-images__close">
                 ✕ Cerrar
               </button>
             </div>
-
-            <div className="flex flex-col gap-3 mb-4">
+            <div className="admin-images__list">
               {productImages.map(img => (
-                <div key={img.id} className="flex items-center gap-3 border border-gray-100 rounded-xl p-3">
-                  <img src={img.url} alt="extra" className="w-16 h-16 object-cover rounded-xl shrink-0" />
+                <div key={img.id} className="admin-images__item">
+                  <img src={img.url} alt="extra" className="admin-images__preview" />
                   <input
-                    className="border border-gray-200 rounded-xl px-3 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                    className="admin-images__input"
                     defaultValue={img.url}
-                    onBlur={e => {
-                      if (e.target.value !== img.url) {
-                        updateImage(img.id, e.target.value)
-                      }
-                    }}
+                    onBlur={e => { if (e.target.value !== img.url) updateImage(img.id, e.target.value) }}
                   />
-                  <button
-                    onClick={() => deleteImage(img.id)}
-                    className="text-red-400 hover:text-red-600 border border-red-200 px-3 py-2 rounded-xl text-sm hover:bg-red-50 transition-colors shrink-0"
-                  >
+                  <button onClick={() => deleteImage(img.id)} className="admin-images__btn-delete">
                     Eliminar
                   </button>
                 </div>
               ))}
             </div>
-
-            <div className="flex gap-3 border-t border-gray-100 pt-4">
+            <div className="admin-images__footer">
               <input
-                className="border border-gray-200 rounded-xl px-4 py-2 text-sm flex-1 focus:outline-none focus:ring-2 focus:ring-gray-300"
+                className="admin-images__url-input"
                 placeholder="URL de imagen extra"
                 value={imageUrl}
                 onChange={e => setImageUrl(e.target.value)}
               />
-              <button
-                onClick={addImage}
-                className="bg-gray-900 text-white px-5 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors"
-              >
-                Agregar
-              </button>
+              <button onClick={addImage} className="admin-images__btn-add">Agregar</button>
             </div>
           </div>
         )}
-        {/* Lista de productos */}
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+
+        {/* Lista productos */}
+        <div className="admin-list">
           {products.length === 0 ? (
-            <div className="text-center py-16 text-gray-400">
-              <p className="text-4xl mb-3">📦</p>
-              <p className="text-sm">No hay productos aún</p>
+            <div className="admin-list__empty">
+              <p className="admin-list__empty-icon">📦</p>
+              <p className="admin-list__empty-text">No hay productos aún</p>
             </div>
           ) : (
             products.map((product, index) => (
               <div
                 key={product.id}
-                className={`flex items-center justify-between px-6 py-4 ${
-                  index !== products.length - 1 ? 'border-b border-gray-100' : ''
-                }`}
+                className={`admin-list__item ${index !== products.length - 1 ? 'admin-list__item--border' : ''}`}
               >
-                <div className="flex items-center gap-4">
-                  <img
-                    src={product.image_url}
-                    alt={product.name}
-                    className="w-12 h-12 rounded-xl object-cover bg-gray-100"
-                  />
+                <div className="admin-list__item-left">
+                  <img src={product.image_url} alt={product.name} className="admin-list__item-image" />
                   <div>
-                    <p className="text-sm font-medium text-gray-900">{product.name}</p>
-                    <p className="text-xs text-gray-400">${product.price} — Stock: {product.stock}</p>
+                    <p className="admin-list__item-name">{product.name}</p>
+                    <p className="admin-list__item-meta">${product.price} — Stock: {product.stock}</p>
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => fetchImages(product.id)}
-                    className="text-sm border border-gray-200 px-4 py-1.5 rounded-xl hover:bg-gray-50 transition-colors"
-                  >
+                <div className="admin-list__item-actions">
+                  <button onClick={() => fetchImages(product.id)} className="admin-btn-images">
                     🖼️ Imágenes
                   </button>
-                  <button
-                    onClick={() => handleEdit(product)}
-                    className="text-sm border border-gray-200 px-4 py-1.5 rounded-xl hover:bg-gray-50 transition-colors"
-                  >
+                  <button onClick={() => handleEdit(product)} className="admin-btn-edit">
                     Editar
                   </button>
-                  <button
-                    onClick={() => handleDelete(product.id)}
-                    className="text-sm border border-red-200 text-red-400 px-4 py-1.5 rounded-xl hover:bg-red-50 transition-colors"
-                  >
+                  <button onClick={() => handleDelete(product.id)} className="admin-btn-delete">
                     Eliminar
                   </button>
                 </div>

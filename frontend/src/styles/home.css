@@ -1,0 +1,76 @@
+@layer components {
+
+  /* Layout */
+  .home-wrapper {
+    @apply min-h-screen bg-gray-50;
+  }
+
+  /* Hero */
+  .home-hero {
+    @apply bg-gray-950 text-white py-16 px-6 text-center;
+  }
+  .home-hero__title {
+    @apply text-4xl font-bold mb-3 tracking-tight;
+  }
+  .home-hero__subtitle {
+    @apply text-gray-400 text-lg;
+  }
+
+  /* Contenedor principal */
+  .home-container {
+    @apply max-w-6xl mx-auto px-6 py-10;
+  }
+
+  /* Filtros */
+  .home-filters {
+    @apply flex flex-col sm:flex-row gap-3 mb-10;
+  }
+  .home-filters__input {
+    @apply border border-gray-200 rounded-xl px-4 py-3 w-full sm:w-1/2 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300;
+  }
+  .home-filters__select {
+    @apply border border-gray-200 rounded-xl px-4 py-3 w-full sm:w-1/4 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-gray-300;
+  }
+
+  /* Grid de productos */
+  .home-grid {
+    @apply grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6;
+  }
+
+  /* Card */
+  .product-card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow duration-200;
+  }
+  .product-card__image {
+    @apply w-full h-52 object-cover cursor-pointer;
+  }
+  .product-card__body {
+    @apply p-4;
+  }
+  .product-card__title {
+    @apply text-base font-semibold mb-1 cursor-pointer hover:text-gray-600 transition-colors;
+  }
+  .product-card__description {
+    @apply text-gray-400 text-sm mb-3 line-clamp-2;
+  }
+  .product-card__footer {
+    @apply flex items-center justify-between;
+  }
+  .product-card__price {
+    @apply text-lg font-bold text-gray-900;
+  }
+  .product-card__btn {
+    @apply bg-gray-900 text-white text-sm px-4 py-2 rounded-xl hover:bg-gray-700 transition-colors;
+  }
+
+  /* Empty state */
+  .home-empty {
+    @apply text-center py-20 text-gray-400;
+  }
+  .home-empty__icon {
+    @apply text-5xl mb-4;
+  }
+  .home-empty__text {
+    @apply text-lg;
+  }
+}

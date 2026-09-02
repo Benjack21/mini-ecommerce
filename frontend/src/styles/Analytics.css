@@ -1,0 +1,79 @@
+@layer components {
+
+  /* Layout */
+  .analytics-wrapper {
+    @apply min-h-screen bg-gray-50 px-6 py-10;
+  }
+  .analytics-container {
+    @apply max-w-5xl mx-auto;
+  }
+
+  /* Header */
+  .analytics-header {
+    @apply flex items-center gap-4 mb-8;
+  }
+  .analytics-header__back {
+    @apply text-sm text-gray-400 hover:text-gray-900 transition-colors;
+  }
+  .analytics-header__title {
+    @apply text-2xl font-bold text-gray-900;
+  }
+
+  /* Stats grid */
+  .analytics-stats {
+    @apply grid grid-cols-2 md:grid-cols-4 gap-4 mb-8;
+  }
+  .analytics-stat-card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm p-5;
+  }
+  .analytics-stat-card__icon {
+    @apply text-3xl mb-2;
+  }
+  .analytics-stat-card__value {
+    @apply text-2xl font-bold text-gray-900;
+  }
+  .analytics-stat-card__label {
+    @apply text-gray-400 text-sm;
+  }
+
+  /* Panels grid */
+  .analytics-panels {
+    @apply grid grid-cols-1 md:grid-cols-2 gap-6;
+  }
+  .analytics-panel {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm p-6;
+  }
+  .analytics-panel__title {
+    @apply font-bold text-gray-900 mb-4;
+  }
+  .analytics-panel__empty {
+    @apply text-gray-400 text-sm;
+  }
+
+  /* Filas compartidas */
+  .analytics-row {
+    @apply flex justify-between items-center py-3 border-b border-gray-100 last:border-0;
+  }
+  .analytics-row__value {
+    @apply text-sm font-semibold text-gray-900;
+  }
+
+  /* Top productos */
+  .analytics-product__left {
+    @apply flex items-center gap-3;
+  }
+  .analytics-product__rank {
+    @apply text-gray-400 text-sm font-medium w-5;
+  }
+  .analytics-product__name {
+    @apply text-sm text-gray-700;
+  }
+
+  /* Órdenes recientes */
+  .analytics-order__user {
+    @apply text-sm font-medium text-gray-900;
+  }
+  .analytics-order__date {
+    @apply text-xs text-gray-400;
+  }
+}

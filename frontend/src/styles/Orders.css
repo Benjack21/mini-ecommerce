@@ -1,0 +1,79 @@
+@layer components {
+
+  /* Loading */
+  .orders-loading {
+    @apply min-h-screen bg-gray-50 flex items-center justify-center;
+  }
+  .orders-loading__spinner {
+    @apply w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin;
+  }
+
+  /* Layout */
+  .orders-wrapper {
+    @apply min-h-screen bg-gray-50 px-6 py-10;
+  }
+  .orders-container {
+    @apply max-w-2xl mx-auto;
+  }
+
+  /* Header */
+  .orders-header {
+    @apply flex items-center gap-4 mb-8;
+  }
+  .orders-header__back {
+    @apply text-sm text-gray-400 hover:text-gray-900 transition-colors;
+  }
+  .orders-header__title {
+    @apply text-2xl font-bold text-gray-900;
+  }
+
+  /* Empty */
+  .orders-empty {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm text-center py-20;
+  }
+  .orders-empty__icon {
+    @apply text-5xl mb-4;
+  }
+  .orders-empty__text {
+    @apply text-gray-400 mb-6;
+  }
+  .orders-empty__btn {
+    @apply bg-gray-900 text-white px-6 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors;
+  }
+
+  /* Lista órdenes */
+  .orders-list {
+    @apply flex flex-col gap-4;
+  }
+  .orders-card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden;
+  }
+
+  /* Card header */
+  .orders-card__header {
+    @apply flex justify-between items-center px-6 py-4 border-b border-gray-100;
+  }
+  .orders-card__id {
+    @apply font-semibold text-gray-900;
+  }
+  .orders-card__date {
+    @apply text-xs text-gray-400;
+  }
+  .orders-card__total {
+    @apply text-lg font-bold text-gray-900;
+  }
+
+  /* Card items */
+  .orders-card__body {
+    @apply px-6 py-3;
+  }
+  .orders-card__item {
+    @apply flex justify-between items-center py-2 text-sm;
+  }
+  .orders-card__item-name {
+    @apply text-gray-700;
+  }
+  .orders-card__item-meta {
+    @apply text-gray-400;
+  }
+}

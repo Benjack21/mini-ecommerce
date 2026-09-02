@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api'
+import '../styles/Orders.css'
 
 function Orders() {
   const [orders, setOrders] = useState([])
@@ -13,7 +14,6 @@ function Orders() {
       navigate('/login')
       return
     }
-
     api.get('/orders/me/')
       .then(res => setOrders(res.data))
       .catch(err => console.error('Error al obtener órdenes:', err))
@@ -21,79 +21,46 @@ function Orders() {
   }, [token, navigate])
 
   if (loading) return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-      <div className="w-8 h-8 border-4 border-gray-200 border-t-gray-900 rounded-full animate-spin"></div>
+    <div className="orders-loading">
+      <div className="orders-loading__spinner"></div>
     </div>
   )
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="max-w-2xl mx-auto">
+    <div className="orders-wrapper">
+      <div className="orders-container">
 
-        <div className="flex items-center gap-4 mb-8">
-          <button
-            onClick={() => navigate('/')}
-            className="text-sm text-gray-400 hover:text-gray-900 transition-colors"
-          >
+        <div className="orders-header">
+          <button onClick={() => navigate('/')} className="orders-header__back">
             ← Volver
           </button>
-
-          <h1 className="text-2xl font-bold text-gray-900">
-            Mis Órdenes
-          </h1>
+          <h1 className="orders-header__title">Mis Órdenes</h1>
         </div>
 
         {orders.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm text-center py-20">
-            <p className="text-5xl mb-4">📦</p>
-
-            <p className="text-gray-400 mb-6">
-              Aún no tienes órdenes
-            </p>
-
-            <button
-              onClick={() => navigate('/')}
-              className="bg-gray-900 text-white px-6 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors"
-            >
+          <div className="orders-empty">
+            <p className="orders-empty__icon">📦</p>
+            <p className="orders-empty__text">Aún no tienes órdenes</p>
+            <button onClick={() => navigate('/')} className="orders-empty__btn">
               Ver productos
             </button>
           </div>
         ) : (
-          <div className="flex flex-col gap-4">
+          <div className="orders-list">
             {orders.map(order => (
-              <div
-                key={order.id}
-                className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden"
-              >
-                <div className="flex justify-between items-center px-6 py-4 border-b border-gray-100">
+              <div key={order.id} className="orders-card">
+                <div className="orders-card__header">
                   <div>
-                    <p className="font-semibold text-gray-900">
-                      Orden #{order.id}
-                    </p>
-
-                    <p className="text-xs text-gray-400">
-                      {order.created_at}
-                    </p>
+                    <p className="orders-card__id">Orden #{order.id}</p>
+                    <p className="orders-card__date">{order.created_at}</p>
                   </div>
-
-                  <span className="text-lg font-bold text-gray-900">
-                    ${order.total}
-                  </span>
+                  <span className="orders-card__total">${order.total}</span>
                 </div>
-
-                <div className="px-6 py-3">
+                <div className="orders-card__body">
                   {order.items.map((item, index) => (
-                    <div
-                      key={index}
-                      className="flex justify-between items-center py-2 text-sm"
-                    >
-                      <span className="text-gray-700">
-                        {item.product}
-                      </span>
-
-                      <span className="text-gray-400">
-                        x{item.quantity} — ${item.price}
-                      </span>
+                    <div key={index} className="orders-card__item">
+                      <span className="orders-card__item-name">{item.product}</span>
+                      <span className="orders-card__item-meta">x{item.quantity} — ${item.price}</span>
                     </div>
                   ))}
                 </div>

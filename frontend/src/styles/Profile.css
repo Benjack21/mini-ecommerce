@@ -1,0 +1,74 @@
+@layer components {
+
+  /* Loading */
+  .profile-loading {
+    @apply min-h-screen bg-gray-50 flex items-center justify-center;
+  }
+  .profile-loading__text {
+    @apply text-gray-400;
+  }
+
+  /* Layout */
+  .profile-wrapper {
+    @apply min-h-screen bg-gray-50 px-6 py-10;
+  }
+  .profile-container {
+    @apply max-w-md mx-auto;
+  }
+  .profile-title {
+    @apply text-2xl font-bold text-gray-900 mb-8;
+  }
+
+  /* Avatar card */
+  .profile-avatar-card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center mb-4;
+  }
+  .profile-avatar {
+    @apply w-20 h-20 rounded-full bg-gray-900 text-white text-3xl font-bold flex items-center justify-center mx-auto mb-4;
+  }
+  .profile-avatar-card__name {
+    @apply text-xl font-bold text-gray-900 mb-1;
+  }
+  .profile-badge--staff {
+    @apply text-xs px-3 py-1 rounded-full font-medium bg-yellow-50 text-yellow-600;
+  }
+  .profile-badge--client {
+    @apply text-xs px-3 py-1 rounded-full font-medium bg-gray-100 text-gray-500;
+  }
+
+  /* Stats */
+  .profile-stats {
+    @apply grid grid-cols-2 gap-3 mb-4;
+  }
+  .profile-stat-card {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm p-5 text-center;
+  }
+  .profile-stat-card__value {
+    @apply text-3xl font-bold text-gray-900 mb-1;
+  }
+  .profile-stat-card__label {
+    @apply text-gray-400 text-sm;
+  }
+
+  /* Acciones */
+  .profile-actions {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4;
+  }
+  .profile-action-link {
+    @apply flex justify-between items-center px-6 py-4 hover:bg-gray-50 transition-colors;
+  }
+  .profile-action-link--border {
+    @apply border-b border-gray-100;
+  }
+  .profile-action-link__label {
+    @apply text-sm text-gray-700;
+  }
+  .profile-action-link__arrow {
+    @apply text-gray-400;
+  }
+
+  /* Cerrar sesión */
+  .profile-btn-logout {
+    @apply w-full border border-red-200 text-red-400 py-3 rounded-xl text-sm font-medium hover:bg-red-50 transition-colors;
+  }
+}

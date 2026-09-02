@@ -1,0 +1,92 @@
+@layer components {
+
+  /* Layout */
+  .cart-wrapper {
+    @apply min-h-screen bg-gray-50 px-6 py-10;
+  }
+  .cart-container {
+    @apply max-w-2xl mx-auto;
+  }
+  .cart-title {
+    @apply text-2xl font-bold text-gray-900 mb-8;
+  }
+
+  /* Sin login */
+  .cart-locked {
+    @apply min-h-screen bg-gray-50 flex items-center justify-center;
+  }
+  .cart-locked__inner {
+    @apply text-center;
+  }
+  .cart-locked__icon {
+    @apply text-5xl mb-4;
+  }
+  .cart-locked__text {
+    @apply text-gray-400 mb-4;
+  }
+  .cart-locked__btn {
+    @apply bg-gray-900 text-white px-6 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors;
+  }
+
+  /* Empty */
+  .cart-empty {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm text-center py-20;
+  }
+  .cart-empty__icon {
+    @apply text-5xl mb-4;
+  }
+  .cart-empty__text {
+    @apply text-gray-400 mb-6;
+  }
+  .cart-empty__btn {
+    @apply bg-gray-900 text-white px-6 py-2 rounded-xl text-sm hover:bg-gray-700 transition-colors;
+  }
+
+  /* Lista items */
+  .cart-list {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden mb-4;
+  }
+  .cart-item {
+    @apply flex items-center justify-between px-6 py-4;
+  }
+  .cart-item--border {
+    @apply border-b border-gray-100;
+  }
+  .cart-item__name {
+    @apply font-medium text-gray-900 w-1/3;
+  }
+  .cart-item__controls {
+    @apply flex items-center gap-3;
+  }
+  .cart-item__btn {
+    @apply w-7 h-7 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-600 flex items-center justify-center transition-colors;
+  }
+  .cart-item__quantity {
+    @apply w-5 text-center text-sm font-medium;
+  }
+  .cart-item__total {
+    @apply font-semibold text-gray-900;
+  }
+  .cart-item__remove {
+    @apply text-gray-300 hover:text-red-400 transition-colors text-lg;
+  }
+
+  /* Resumen */
+  .cart-summary {
+    @apply bg-white rounded-2xl border border-gray-100 shadow-sm px-6 py-5 mb-4;
+  }
+  .cart-summary__row {
+    @apply flex justify-between items-center;
+  }
+  .cart-summary__label {
+    @apply text-gray-400 text-sm;
+  }
+  .cart-summary__total {
+    @apply text-2xl font-bold text-gray-900;
+  }
+
+  /* Botón pago */
+  .cart-btn-pay {
+    @apply w-full bg-gray-900 text-white py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors;
+  }
+}

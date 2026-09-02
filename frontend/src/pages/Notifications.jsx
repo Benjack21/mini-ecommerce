@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
 import Spinner from '../components/Spinner'
 import api from '../api'
+import '../styles/Notifications.css'
 
 function Notifications() {
   const [notifications, setNotifications] = useState([])
@@ -26,7 +27,6 @@ function Notifications() {
       navigate('/login')
       return
     }
-
     fetchNotifications()
     markAllRead()
   }, [token, navigate, fetchNotifications, markAllRead])
@@ -34,46 +34,28 @@ function Notifications() {
   if (loading) return <Spinner />
 
   return (
-    <div className="min-h-screen bg-gray-50 px-6 py-10">
-      <div className="max-w-2xl mx-auto">
-        <h1 className="text-2xl font-bold text-gray-900 mb-8">
-          🔔 Notificaciones
-        </h1>
+    <div className="notif-wrapper">
+      <div className="notif-container">
+        <h1 className="notif-title">🔔 Notificaciones</h1>
 
         {notifications.length === 0 ? (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm text-center py-20">
-            <p className="text-5xl mb-4">🔕</p>
-            <p className="text-gray-400">
-              No tienes notificaciones
-            </p>
+          <div className="notif-empty">
+            <p className="notif-empty__icon">🔕</p>
+            <p className="notif-empty__text">No tienes notificaciones</p>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+          <div className="notif-list">
             {notifications.map((n, index) => (
               <div
                 key={n.id}
-                className={`px-6 py-4 ${
-                  index !== notifications.length - 1
-                    ? 'border-b border-gray-100'
-                    : ''
-                } ${
-                  !n.read ? 'bg-blue-50' : ''
-                }`}
+                className={`notif-item ${index !== notifications.length - 1 ? 'notif-item--border' : ''} ${!n.read ? 'notif-item--unread' : ''}`}
               >
-                <div className="flex justify-between items-start gap-4">
-                  <p className="text-sm text-gray-700">
-                    {n.message}
-                  </p>
-
-                  <span className="text-xs text-gray-400 shrink-0">
-                    {n.created_at}
-                  </span>
+                <div className="notif-item__row">
+                  <p className="notif-item__message">{n.message}</p>
+                  <span className="notif-item__date">{n.created_at}</span>
                 </div>
-
                 {!n.read && (
-                  <span className="inline-block mt-1 text-xs bg-blue-100 text-blue-600 px-2 py-0.5 rounded-full">
-                    Nueva
-                  </span>
+                  <span className="notif-item__badge">Nueva</span>
                 )}
               </div>
             ))}

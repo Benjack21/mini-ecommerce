@@ -1,13 +1,10 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import api from '../api'
+import '../styles/Login.css'
 
 function Register() {
-  const [form, setForm] = useState({
-    username: '',
-    password: ''
-  })
-
+  const [form, setForm] = useState({ username: '', password: '' })
   const [error, setError] = useState('')
   const navigate = useNavigate()
 
@@ -22,66 +19,40 @@ function Register() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-      <div className="bg-white w-full max-w-sm rounded-2xl shadow-sm border border-gray-100 p-8">
+    <div className="login-wrapper">
+      <div className="login-card">
 
-        <div className="text-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">
-            Crear cuenta
-          </h1>
-
-          <p className="text-gray-400 text-sm mt-1">
-            Únete a MiniShop
-          </p>
+        <div className="login-header">
+          <h1 className="login-header__title">Crear cuenta</h1>
+          <p className="login-header__subtitle">Únete a MiniShop</p>
         </div>
 
         {error && (
-          <div className="bg-red-50 text-red-500 text-sm px-4 py-3 rounded-xl mb-4">
-            {error}
-          </div>
+          <div className="login-error">{error}</div>
         )}
 
-        <div className="flex flex-col gap-3">
+        <div className="login-form">
           <input
-            className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+            className="login-form__input"
             placeholder="Usuario"
             value={form.username}
-            onChange={e =>
-              setForm({
-                ...form,
-                username: e.target.value
-              })
-            }
+            onChange={e => setForm({...form, username: e.target.value})}
           />
-
           <input
-            className="border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+            className="login-form__input"
             type="password"
             placeholder="Contraseña"
             value={form.password}
-            onChange={e =>
-              setForm({
-                ...form,
-                password: e.target.value
-              })
-            }
+            onChange={e => setForm({...form, password: e.target.value})}
           />
-
-          <button
-            onClick={handleSubmit}
-            className="bg-gray-900 text-white py-3 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors mt-2"
-          >
+          <button onClick={handleSubmit} className="login-form__btn">
             Registrarse
           </button>
         </div>
 
-        <p className="text-center text-sm text-gray-400 mt-6">
+        <p className="login-footer">
           ¿Ya tienes cuenta?{' '}
-
-          <Link
-            to="/login"
-            className="text-gray-900 font-medium hover:underline"
-          >
+          <Link to="/login" className="login-footer__link">
             Inicia sesión
           </Link>
         </p>

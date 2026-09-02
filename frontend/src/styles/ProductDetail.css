@@ -1,0 +1,170 @@
+@layer components {
+
+  /* Loading */
+  .product-loading {
+    @apply min-h-screen bg-gray-50 flex items-center justify-center;
+  }
+  .product-loading__text {
+    @apply text-gray-400;
+  }
+
+  /* Layout */
+  .product-wrapper {
+    @apply min-h-screen bg-gray-50 px-6 py-10;
+  }
+  .product-container {
+    @apply max-w-4xl mx-auto;
+  }
+  .product-back {
+    @apply text-sm text-gray-400 hover:text-gray-900 transition-colors mb-8 flex items-center gap-1;
+  }
+
+  /* Card principal */
+  .product-card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden mb-8;
+  }
+  .product-card__inner {
+    @apply flex flex-col sm:flex-row;
+  }
+
+  /* Galería */
+  .product-gallery {
+    @apply w-full sm:w-1/2 relative;
+  }
+  .product-gallery__img {
+    @apply w-full h-80 object-cover;
+  }
+  .product-gallery__prev {
+    @apply absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 w-8 h-8 rounded-full flex items-center justify-center shadow transition-all;
+  }
+  .product-gallery__next {
+    @apply absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 w-8 h-8 rounded-full flex items-center justify-center shadow transition-all;
+  }
+  .product-gallery__dots {
+    @apply absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5;
+  }
+  .product-gallery__dot {
+    @apply w-2 h-2 rounded-full transition-all bg-white bg-opacity-50;
+  }
+  .product-gallery__dot--active {
+    @apply w-4 bg-white bg-opacity-100;
+  }
+
+  /* Info */
+  .product-info {
+    @apply p-8 flex flex-col justify-between w-full;
+  }
+  .product-info__name {
+    @apply text-2xl font-bold text-gray-900 mb-2;
+  }
+  .product-info__rating {
+    @apply text-yellow-500 text-sm mb-3;
+  }
+  .product-info__description {
+    @apply text-gray-400 text-sm leading-relaxed mb-6;
+  }
+  .product-info__price-row {
+    @apply flex items-center gap-4 mb-6;
+  }
+  .product-info__price {
+    @apply text-3xl font-bold text-gray-900;
+  }
+  .product-info__stock--available {
+    @apply text-sm px-3 py-1 rounded-full bg-green-50 text-green-600;
+  }
+  .product-info__stock--empty {
+    @apply text-sm px-3 py-1 rounded-full bg-red-50 text-red-500;
+  }
+  .product-info__actions {
+    @apply flex gap-3;
+  }
+
+  /* Botón wishlist */
+  .product-btn-wishlist {
+    @apply px-4 py-3 rounded-xl text-sm font-medium border transition-colors;
+  }
+  .product-btn-wishlist--active {
+    @apply border-red-300 text-red-400 hover:bg-red-50;
+  }
+  .product-btn-wishlist--inactive {
+    @apply border-gray-200 text-gray-500 hover:bg-gray-50;
+  }
+
+  /* Botón carrito */
+  .product-btn-cart {
+    @apply flex-1 py-3 rounded-xl text-sm font-medium transition-colors;
+  }
+  .product-btn-cart--added {
+    @apply bg-green-500 text-white;
+  }
+  .product-btn-cart--disabled {
+    @apply bg-gray-100 text-gray-400 cursor-not-allowed;
+  }
+  .product-btn-cart--default {
+    @apply bg-gray-900 text-white hover:bg-gray-700;
+  }
+
+  /* Reseñas */
+  .reviews-card {
+    @apply bg-white rounded-2xl shadow-sm border border-gray-100 p-6 mb-6;
+  }
+  .reviews-card__title {
+    @apply text-lg font-bold text-gray-900 mb-6;
+  }
+  .reviews-card__empty {
+    @apply text-gray-400 text-sm mb-6;
+  }
+  .reviews-list {
+    @apply flex flex-col gap-4 mb-6;
+  }
+  .review-item {
+    @apply border-b border-gray-100 pb-4;
+  }
+  .review-item__header {
+    @apply flex justify-between items-center mb-1;
+  }
+  .review-item__user {
+    @apply font-medium text-sm text-gray-900;
+  }
+  .review-item__date {
+    @apply text-xs text-gray-400;
+  }
+  .review-item__stars {
+    @apply text-yellow-500 text-sm mb-1;
+  }
+  .review-item__comment {
+    @apply text-gray-500 text-sm;
+  }
+
+  /* Formulario reseña */
+  .review-form {
+    @apply border-t border-gray-100 pt-6;
+  }
+  .review-form__title {
+    @apply text-sm font-semibold text-gray-900 mb-4;
+  }
+  .review-form__stars {
+    @apply flex gap-2 mb-3;
+  }
+  .review-form__star {
+    @apply text-2xl transition-transform hover:scale-110;
+  }
+  .review-form__star--active {
+    @apply text-yellow-400;
+  }
+  .review-form__star--inactive {
+    @apply text-gray-200;
+  }
+  .review-form__textarea {
+    @apply w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300 mb-3;
+  }
+  .review-form__btn {
+    @apply bg-gray-900 text-white px-6 py-2 rounded-xl text-sm font-medium hover:bg-gray-700 transition-colors;
+  }
+  .review-login {
+    @apply text-sm text-gray-400 border-t border-gray-100 pt-4;
+  }
+  .review-login__link {
+    @apply text-gray-900 font-medium hover:underline;
+  }
+}
