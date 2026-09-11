@@ -16,7 +16,7 @@ function Analytics() {
     }
     api.get('/analytics/')
       .then(res => setData(res.data))
-      .catch(() => navigate('/'))
+      .catch(err => console.error(err))
   }, [token, navigate])
 
   if (!data) return <Spinner />

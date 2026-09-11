@@ -16,7 +16,7 @@ function Orders() {
     }
     api.get('/orders/me/')
       .then(res => setOrders(res.data))
-      .catch(err => console.error('Error al obtener órdenes:', err))
+      .catch(err => console.error(err))
       .finally(() => setLoading(false))
   }, [token, navigate])
 

@@ -16,7 +16,7 @@ function Profile() {
     }
     api.get('/me/')
       .then(res => setUser(res.data))
-      .catch(() => navigate('/login'))
+      .catch(err => console.error(err))
 
     api.get('/cart/me/')
       .then(res => setCartCount(res.data.length))
