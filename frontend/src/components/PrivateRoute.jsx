@@ -1,4 +1,5 @@
 import { Navigate } from 'react-router-dom'
+import { jwtDecode } from 'jwt-decode'
 
 function PrivateRoute({ children, adminOnly = false }) {
   const token = localStorage.getItem('token')
@@ -7,14 +8,13 @@ function PrivateRoute({ children, adminOnly = false }) {
 
   if (adminOnly) {
     let isStaff = false
-
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]))
-      isStaff = payload.is_staff
+      const payload = jwtDecode(token)
+      isStaff = !!payload.is_staff
     } catch {
       return <Navigate to="/login" />
     }
-
+    
     if (!isStaff) return <Navigate to="/" />
   }
 

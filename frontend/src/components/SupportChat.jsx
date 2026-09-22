@@ -20,6 +20,17 @@ function SupportChat() {
   const sendMessage = async () => {
     if (!input.trim() || loading) return
 
+    // [FASE 1.6] El endpoint /chat/ ahora exige login (IsAuthenticated).
+    // Si no hay token mostramos un mensaje claro en vez de llamar a la API
+    // y recibir un 401 que el interceptor redirigiría a /login.
+    if (!localStorage.getItem('token')) {
+      setMessages(prev => [
+        ...prev,
+        { role: 'assistant', content: 'Debes iniciar sesión para usar el chat de soporte. 😊' }
+      ])
+      return
+    }
+
     const userMessage = {
       role: 'user',
       content: input.trim()

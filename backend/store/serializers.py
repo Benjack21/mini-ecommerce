@@ -22,4 +22,8 @@ class CartItemSerializer(serializers.ModelSerializer):
     class Meta:
         model = CartItem
         fields = '__all__'
+        # [FASE 1.3] `user` solo lectura: no se acepta desde el body.
+        # El ViewSet lo fuerza con perform_create(user=request.user).
+        # Previene que alguien cree ítems en el carrito de otro usuario.
+        read_only_fields = ('user',)
     

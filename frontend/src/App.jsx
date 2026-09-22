@@ -6,7 +6,10 @@ import Register from './pages/Register'
 import Cart from './pages/Cart'
 import ProductDetail from './pages/ProductDetail'
 import AdminPanel from './pages/AdminPanel'
-import ProtectedRoute from './components/ProtectedRoute'
+// [FASE 1.2] Se eliminó el import de ProtectedRoute: era código muerto.
+// App.jsx lo importaba pero NUNCA lo usaba (solo usaba PrivateRoute).
+// Existían 2 guards casi idénticos (PrivateRoute y ProtectedRoute);
+// nos quedamos con PrivateRoute que es el que realmente protege rutas.
 import Profile from './pages/Profile'
 import NotFound from './pages/NotFound'
 import Orders from './pages/Orders'
@@ -31,7 +34,9 @@ function App() {
         <Route path="/profile" element={
           <PrivateRoute><Profile /></PrivateRoute>
         } />
-        // Rutas que requieren ser admin
+        {/* [FASE 1.8] ANTES era "// Rutas..." (comentario JS). Dentro de JSX
+            eso NO es un comentario: se renderiza como TEXTO VISIBLE en la página.
+            La sintaxis correcta es el comentario de multilinea de JSX. */}
         <Route path="/admin-panel" element={
           <PrivateRoute adminOnly><AdminPanel /></PrivateRoute>
         } />

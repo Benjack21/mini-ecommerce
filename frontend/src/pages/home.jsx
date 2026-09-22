@@ -5,7 +5,9 @@ import Toast from '../components/Toast'
 import useToast from '../hooks/useToast'
 import Spinner from '../components/Spinner'
 import Pagination from '../components/Pagination'
-import '../styles/Home.css'               // ← única línea nueva
+// [FASE 1.5] Fix case-sensitive: el archivo real es `home.css` (minúscula).
+// Con `Home.css` funcionaba en Windows pero ROMPE en Linux/Docker (build).
+import '../styles/home.css'
 
 function Home() {
   const [products, setProducts] = useState([])

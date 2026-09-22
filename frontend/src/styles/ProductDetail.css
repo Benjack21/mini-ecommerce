@@ -36,19 +36,19 @@
     @apply w-full h-80 object-cover;
   }
   .product-gallery__prev {
-    @apply absolute left-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 w-8 h-8 rounded-full flex items-center justify-center shadow transition-all;
+    @apply absolute left-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white/100 w-8 h-8 rounded-full flex items-center justify-center shadow transition-all;
   }
   .product-gallery__next {
-    @apply absolute right-2 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 hover:bg-opacity-100 w-8 h-8 rounded-full flex items-center justify-center shadow transition-all;
+    @apply absolute right-2 top-1/2 -translate-y-1/2 bg-white/80 hover:bg-white/100 w-8 h-8 rounded-full flex items-center justify-center shadow transition-all;
   }
   .product-gallery__dots {
     @apply absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1.5;
   }
   .product-gallery__dot {
-    @apply w-2 h-2 rounded-full transition-all bg-white bg-opacity-50;
+    @apply w-2 h-2 rounded-full transition-all bg-white/50;
   }
   .product-gallery__dot--active {
-    @apply w-4 bg-white bg-opacity-100;
+    @apply w-4 bg-white/100;
   }
 
   /* Info */

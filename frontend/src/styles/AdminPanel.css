@@ -133,4 +133,9 @@
   .admin-btn-edit {
     @apply text-sm border border-gray-200 px-4 py-1.5 rounded-xl hover:bg-gray-50 transition-colors;
   }
-  .admin-btn-delete
+  /* [FIX BUILD] El archivo terminaba en ".admin-btn-delete" sin cuerpo ni
+     cerrar el @layer components → error "Missing closing }" en Tailwind. */
+  .admin-btn-delete {
+    @apply text-sm text-red-500 border border-red-200 px-4 py-1.5 rounded-xl hover:bg-red-50 transition-colors;
+  }
+}

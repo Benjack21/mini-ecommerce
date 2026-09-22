@@ -1,9 +1,9 @@
 # 🛒 Mini E-commerce
-
+ 
 Aplicación web de tienda online construida con React y Django.
-
+ 
 ## Tecnologías
-
+ 
 ### Frontend
 - **React** 19.2.4 - UI Framework
 - **Vite** 8.0.1 - Build tool con HMR
@@ -11,7 +11,7 @@ Aplicación web de tienda online construida con React y Django.
 - **Axios** 1.14.0 - Cliente HTTP
 - **React Router DOM** 7.13.2 - Routing y navegación
 - **ESLint** 9.39.4 - Linter de código
-
+ 
 ### Backend
 - **Django** 6.0.3 - Framework web
 - **Django REST Framework** 3.17.1 - API REST
@@ -21,9 +21,9 @@ Aplicación web de tienda online construida con React y Django.
 - **Gunicorn** 25.3.0 - Servidor WSGI
 - **WhiteNoise** 6.12.0 - Servir archivos estáticos
 - **Transbank SDK** 6.1.0 - Integración de pagos
-
+ 
 ## Funcionalidades
-
+ 
 - Registro e inicio de sesión con JWT
 - Listado de productos
 - Carrito de compras por usuario (agregar, editar cantidad, eliminar)
@@ -31,10 +31,29 @@ Aplicación web de tienda online construida con React y Django.
 - Integración de pagos con Transbank
 - Autenticación segura con tokens JWT
 - API RESTful completa
-
+ 
 ## Cómo correr el proyecto
-#pendiente
-
+ 
+### Backend
+1. Crear y activar venv en la raíz: `python -m venv venv`
+2. Instalar dependencias: `& "venv\Scripts\python.exe" -m pip install -r requirements.txt`
+3. Configurar `.env` en la raíz y en `backend/backend/.env`.
+4. Ejecutar migraciones: `& "venv\Scripts\python.exe" backend\manage.py migrate`
+5. Seed de datos: `& "venv\Scripts\python.exe" backend\manage.py seed`
+6. Correr servidor: `& "venv\Scripts\python.exe" backend\manage.py runserver`
+ 
+### Frontend
+1. Entrar a carpeta: `cd frontend`
+2. Instalar: `npm install`
+3. Correr: `npm run dev`
+ 
+### Docker
+- `docker-compose up --build`
+ 
+## Documentación del Proyecto
+- [AGENTS.md](./AGENTS.md) - Guía técnica para desarrolladores y agentes.
+- [FASES.md](./FASES.md) - Plan de refactorización y evolución del proyecto.
+ 
 📸 Screenshots
 <br>
 -home
