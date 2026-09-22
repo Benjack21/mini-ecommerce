@@ -15,6 +15,7 @@ import PaymentConfirm from './pages/PaymentConfirm'
 import Wishlist from './pages/Wishlist'
 import Notifications from './pages/Notifications'
 import SupportChat from './components/SupportChat'
+import PrivateRoute from './components/PrivateRoute'
 function App() {
   return (
     <BrowserRouter>
@@ -23,24 +24,31 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/cart" element={<Cart />} />
+        <Route path="/cart" element={
+          <PrivateRoute><Cart /></PrivateRoute>
+        } />
         <Route path="/product/:id" element={<ProductDetail />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route path="/profile" element={
+          <PrivateRoute><Profile /></PrivateRoute>
+        } />
+        // Rutas que requieren ser admin
         <Route path="/admin-panel" element={
-          <ProtectedRoute adminOnly={true}>
-            <AdminPanel />
-          </ProtectedRoute>
+          <PrivateRoute adminOnly><AdminPanel /></PrivateRoute>
         } />
         <Route path="*" element={<NotFound />} />
-        <Route path="/orders" element={<Orders />} />
+        <Route path="/orders" element={
+          <PrivateRoute><Orders /></PrivateRoute>
+        } />
         <Route path="/analytics" element={
-          <ProtectedRoute adminOnly={true}>
-            <Analytics />
-          </ProtectedRoute>
+          <PrivateRoute adminOnly><Analytics /></PrivateRoute>
         } />
         <Route path="/payment/confirm" element={<PaymentConfirm />} />
-        <Route path="/wishlist" element={<Wishlist />} />
-        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/wishlist" element={
+          <PrivateRoute><Wishlist /></PrivateRoute>
+        } />
+        <Route path="/notifications" element={
+          <PrivateRoute><Notifications /></PrivateRoute>
+        } />
       </Routes>
       <SupportChat />
     </BrowserRouter>
