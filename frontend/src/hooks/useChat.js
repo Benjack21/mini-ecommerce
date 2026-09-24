@@ -9,7 +9,7 @@ export function useChat() {
   const sendMessage = async (text) => {
     const newUserMessage = { role: 'user', content: text };
     const updatedMessages = [...messages, newUserMessage];
-    
+
     setMessages(updatedMessages);
     setIsTyping(true);
     setError(null);

@@ -1,8 +1,8 @@
-import { useNavigate } from 'react-router-dom'
-import '../styles/NotFound.css'
+import { useNavigate } from 'react-router-dom';
+import '../styles/NotFound.css';
 
 function NotFound() {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <div className="notfound-wrapper">
@@ -20,7 +20,7 @@ function NotFound() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default NotFound
+export default NotFound;

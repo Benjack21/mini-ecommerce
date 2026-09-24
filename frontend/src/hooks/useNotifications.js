@@ -24,7 +24,7 @@ export function useNotifications() {
   const markAllAsRead = async () => {
     try {
       await notificationService.markAsRead();
-      setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+      setNotifications((prev) => prev.map((n) => ({ ...n, read: true })));
     } catch (err) {
       console.error('Error marking notifications as read', err);
     }

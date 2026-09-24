@@ -8,5 +8,5 @@ export const orderService = {
   async getOrders() {
     const response = await api.get('/orders/me/');
     return response.data;
-  }
+  },
 };

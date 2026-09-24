@@ -1,17 +1,17 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback } from 'react';
 
 function useToast() {
-  const [toast, setToast] = useState(null)
+  const [toast, setToast] = useState(null);
 
   const showToast = useCallback((message, type = 'success') => {
-    setToast({ message, type })
-  }, [])
+    setToast({ message, type });
+  }, []);
 
   const hideToast = useCallback(() => {
-    setToast(null)
-  }, [])
+    setToast(null);
+  }, []);
 
-  return { toast, showToast, hideToast }
+  return { toast, showToast, hideToast };
 }
 
-export default useToast
+export default useToast;

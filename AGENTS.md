@@ -23,24 +23,33 @@ Ejecutar desde la carpeta indicada. Usar `npm.cmd` (PowerShell bloquea `npm.ps1`
 ```powershell
 # Tests backend (desde backend/)
 & "..\venv\Scripts\python.exe" manage.py test
- 
+
 # Un solo test / clase
 & "..\venv\Scripts\python.exe" manage.py test store.tests.ProductAPITestCase
 & "..\venv\Scripts\python.exe" manage.py test store.tests -k cart
- 
+
 # Seed de datos de prueba
 & "..\venv\Scripts\python.exe" manage.py seed
- 
+
+# Linting y formateo Python (desde la raíz)
+& "venv\Scripts\python.exe" -m ruff check backend/
+& "venv\Scripts\python.exe" -m ruff check --fix backend/
+& "venv\Scripts\python.exe" -m black backend/
+
 # Frontend (desde frontend/)
 npm.cmd run lint
+npm.cmd run format
 npm.cmd run build
 npm.cmd run dev
 ```
- 
+
 - El venv **válido** es `venv/` en la raíz del repo. `backend/venv/` existe pero **no tiene Django**: no usarlo.
 - `requirements.txt` está en la **raíz**, no en `backend/`:
   `& "venv\Scripts\python.exe" -m pip install -r requirements.txt`
-- Orden de verificación: `lint` → `build` → backend `test`. No hay typecheck, formatter ni CI.
+- Orden de verificación: `lint` → `build` → backend `test`. No hay typecheck ni CI.
+- Linting Python: **Ruff** (reglas `E,F,I,W,UP`) + **Black** (formateo), configurados en `pyproject.toml` en la raíz.
+- Linting Frontend: **ESLint** (reglas en `frontend/eslint.config.js`) + **Prettier** (config en `frontend/.prettierrc`).
+- `.editorconfig` en la raíz uniforma indentación y finales de línea.
  
 ## Entorno (.env)
  

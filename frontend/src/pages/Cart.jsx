@@ -1,47 +1,48 @@
-import { useEffect, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Toast from '../components/Toast'
-import useToast from '../hooks/useToast'
-import api from '../api'
-import '../styles/Cart.css'
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Toast from '../components/Toast';
+import useToast from '../hooks/useToast';
+import api from '../api';
+import '../styles/Cart.css';
 
 function Cart() {
-  const [items, setItems] = useState([])
-  const token = localStorage.getItem('token')
-  const navigate = useNavigate()
-  const { toast, showToast, hideToast } = useToast()
+  const [items, setItems] = useState([]);
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
+  const { toast, showToast, hideToast } = useToast();
 
   const fetchCart = useCallback(() => {
-    api.get('/cart/me/')
-      .then(res => setItems(res.data))
-      .catch(err => console.error(err))
-  }, [])
+    api
+      .get('/cart/me/')
+      .then((res) => setItems(res.data))
+      .catch((err) => console.error(err));
+  }, []);
 
   useEffect(() => {
-    if (!token) return
-    fetchCart()
-  }, [token, fetchCart])
+    if (!token) return;
+    fetchCart();
+  }, [token, fetchCart]);
 
   const updateQuantity = async (id, quantity) => {
-    if (quantity < 1) return
+    if (quantity < 1) return;
     try {
-      await api.patch(`/cartitems/${id}/`, { quantity })
-      fetchCart()
+      await api.patch(`/cartitems/${id}/`, { quantity });
+      fetchCart();
     } catch (err) {
-      console.error('Error al actualizar cantidad:', err)
+      console.error('Error al actualizar cantidad:', err);
     }
-  }
+  };
 
   const removeItem = async (id) => {
     try {
-      await api.delete(`/cartitems/${id}/`)
-      fetchCart()
+      await api.delete(`/cartitems/${id}/`);
+      fetchCart();
     } catch (err) {
-      console.error('Error al eliminar producto:', err)
+      console.error('Error al eliminar producto:', err);
     }
-  }
+  };
 
-  const total = items.reduce((sum, item) => sum + parseFloat(item.total), 0)
+  const total = items.reduce((sum, item) => sum + parseFloat(item.total), 0);
 
   if (!token) {
     return (
@@ -54,18 +55,18 @@ function Cart() {
           </button>
         </div>
       </div>
-    )
+    );
   }
 
   const handlePayment = async () => {
     try {
-      const res = await api.post('/payment/create/', {})
-      window.location.href = `${res.data.url}?token_ws=${res.data.token}`
+      const res = await api.post('/payment/create/', {});
+      window.location.href = `${res.data.url}?token_ws=${res.data.token}`;
     } catch (err) {
-      console.error('Error al iniciar pago:', err)
-      showToast('Error al iniciar el pago', 'error')
+      console.error('Error al iniciar pago:', err);
+      showToast('Error al iniciar el pago', 'error');
     }
-  }
+  };
 
   return (
     <div className="cart-wrapper">
@@ -91,12 +92,24 @@ function Cart() {
                 >
                   <span className="cart-item__name">{item.product}</span>
                   <div className="cart-item__controls">
-                    <button onClick={() => updateQuantity(item.id, item.quantity - 1)} className="cart-item__btn">−</button>
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                      className="cart-item__btn"
+                    >
+                      −
+                    </button>
                     <span className="cart-item__quantity">{item.quantity}</span>
-                    <button onClick={() => updateQuantity(item.id, item.quantity + 1)} className="cart-item__btn">+</button>
+                    <button
+                      onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                      className="cart-item__btn"
+                    >
+                      +
+                    </button>
                   </div>
                   <span className="cart-item__total">${item.total}</span>
-                  <button onClick={() => removeItem(item.id)} className="cart-item__remove">✕</button>
+                  <button onClick={() => removeItem(item.id)} className="cart-item__remove">
+                    ✕
+                  </button>
                 </div>
               ))}
             </div>
@@ -115,7 +128,7 @@ function Cart() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default Cart
+export default Cart;

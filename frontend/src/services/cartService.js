@@ -21,5 +21,5 @@ export const cartService = {
   async deleteCartItem(id) {
     const response = await api.delete(`/cartitems/${id}/`);
     return response.data;
-  }
+  },
 };

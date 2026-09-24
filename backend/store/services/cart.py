@@ -1,5 +1,6 @@
 from ..models import CartItem, Product
 
+
 def add_to_cart(user, product_id, quantity=1):
     """[FASE 2.1] Agrega un producto al carrito del usuario."""
     try:
@@ -15,16 +16,17 @@ def add_to_cart(user, product_id, quantity=1):
     cart_item.save()
     return cart_item, None
 
+
 def get_cart_items(user):
     """[FASE 2.1] Obtiene los ítems del carrito para un usuario."""
     items = CartItem.objects.filter(user=user)
     data = [
         {
-            'id': item.id,
-            'product': item.product.name,
-            'price': str(item.product.price),
-            'quantity': item.quantity,
-            'total': str(item.product.price * item.quantity)
+            "id": item.id,
+            "product": item.product.name,
+            "price": str(item.product.price),
+            "quantity": item.quantity,
+            "total": str(item.product.price * item.quantity),
         }
         for item in items
     ]

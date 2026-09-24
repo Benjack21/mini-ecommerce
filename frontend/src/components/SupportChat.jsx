@@ -1,86 +1,84 @@
-import { useState, useRef, useEffect } from 'react'
-import api from '../api'
+import { useState, useRef, useEffect } from 'react';
+import api from '../api';
 
 function SupportChat() {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: '¡Hola! Soy el asistente de MiniShop. ¿En qué puedo ayudarte? 😊'
-    }
-  ])
-  const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const bottomRef = useRef(null)
+      content: '¡Hola! Soy el asistente de MiniShop. ¿En qué puedo ayudarte? 😊',
+    },
+  ]);
+  const [input, setInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const bottomRef = useRef(null);
 
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+    bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
 
   const sendMessage = async () => {
-    if (!input.trim() || loading) return
+    if (!input.trim() || loading) return;
 
     // [FASE 1.6] El endpoint /chat/ ahora exige login (IsAuthenticated).
     // Si no hay token mostramos un mensaje claro en vez de llamar a la API
     // y recibir un 401 que el interceptor redirigiría a /login.
     if (!localStorage.getItem('token')) {
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
-        { role: 'assistant', content: 'Debes iniciar sesión para usar el chat de soporte. 😊' }
-      ])
-      return
+        { role: 'assistant', content: 'Debes iniciar sesión para usar el chat de soporte. 😊' },
+      ]);
+      return;
     }
 
     const userMessage = {
       role: 'user',
-      content: input.trim()
-    }
+      content: input.trim(),
+    };
 
-    const updatedMessages = [...messages, userMessage]
+    const updatedMessages = [...messages, userMessage];
 
-    setMessages(updatedMessages)
-    setInput('')
-    setLoading(true)
+    setMessages(updatedMessages);
+    setInput('');
+    setLoading(true);
 
     try {
       const response = await api.post('/chat/', {
-        messages: updatedMessages.filter(
-          msg => msg.role === 'user'
-        )
-      })
+        messages: updatedMessages.filter((msg) => msg.role === 'user'),
+      });
 
-      const data = response.data
+      const data = response.data;
 
       if (!response.data?.choices?.[0]?.message?.content) {
-        throw new Error('La respuesta del servidor no tiene el formato esperado')
+        throw new Error('La respuesta del servidor no tiene el formato esperado');
       }
 
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: data.choices[0].message.content
-        }
-      ])
+          content: data.choices[0].message.content,
+        },
+      ]);
     } catch (err) {
-      console.error('Error en el chat:', err)
+      console.error('Error en el chat:', err);
 
       const errorMessage =
         err.response?.data?.error?.message ||
         err.response?.data?.error ||
-        'Lo siento, hubo un error. Por favor intenta de nuevo. 😔'
+        'Lo siento, hubo un error. Por favor intenta de nuevo. 😔';
 
-      setMessages(prev => [
+      setMessages((prev) => [
         ...prev,
         {
           role: 'assistant',
-          content: errorMessage
-        }
-      ])
+          content: errorMessage,
+        },
+      ]);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <>
@@ -99,13 +97,9 @@ function SupportChat() {
             </div>
 
             <div>
-              <p className="text-sm font-semibold">
-                Soporte MiniShop
-              </p>
+              <p className="text-sm font-semibold">Soporte MiniShop</p>
 
-              <p className="text-xs text-gray-400">
-                Asistente IA · Groq
-              </p>
+              <p className="text-xs text-gray-400">Asistente IA · Groq</p>
             </div>
           </div>
 
@@ -113,11 +107,7 @@ function SupportChat() {
             {messages.map((msg, index) => (
               <div
                 key={index}
-                className={`flex ${
-                  msg.role === 'user'
-                    ? 'justify-end'
-                    : 'justify-start'
-                }`}
+                className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
               >
                 <div
                   className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm ${
@@ -147,11 +137,11 @@ function SupportChat() {
               className="flex-1 border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
               placeholder="Escribe tu pregunta..."
               value={input}
-              onChange={e => setInput(e.target.value)}
-              onKeyDown={e => {
+              onChange={(e) => setInput(e.target.value)}
+              onKeyDown={(e) => {
                 if (e.key === 'Enter') {
-                  e.preventDefault()
-                  sendMessage()
+                  e.preventDefault();
+                  sendMessage();
                 }
               }}
             />
@@ -167,7 +157,7 @@ function SupportChat() {
         </div>
       )}
     </>
-  )
+  );
 }
 
-export default SupportChat
+export default SupportChat;

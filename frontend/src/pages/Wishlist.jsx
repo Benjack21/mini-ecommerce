@@ -1,55 +1,56 @@
-import { useEffect, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Toast from '../components/Toast'
-import useToast from '../hooks/useToast'
-import Spinner from '../components/Spinner'
-import api from '../api'
-import '../styles/Wishlist.css'
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Toast from '../components/Toast';
+import useToast from '../hooks/useToast';
+import Spinner from '../components/Spinner';
+import api from '../api';
+import '../styles/Wishlist.css';
 
 function Wishlist() {
-  const [items, setItems] = useState([])
-  const [loading, setLoading] = useState(true)
-  const token = localStorage.getItem('token')
-  const navigate = useNavigate()
-  const { toast, showToast, hideToast } = useToast()
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
+  const { toast, showToast, hideToast } = useToast();
 
   const fetchWishlist = useCallback(() => {
-    api.get('/wishlist/')
-      .then(res => setItems(res.data))
-      .catch(err => console.error('Error al obtener wishlist:', err))
-      .finally(() => setLoading(false))
-  }, [])
+    api
+      .get('/wishlist/')
+      .then((res) => setItems(res.data))
+      .catch((err) => console.error('Error al obtener wishlist:', err))
+      .finally(() => setLoading(false));
+  }, []);
 
   useEffect(() => {
     if (!token) {
-      navigate('/login')
-      return
+      navigate('/login');
+      return;
     }
-    fetchWishlist()
-  }, [token, navigate, fetchWishlist])
+    fetchWishlist();
+  }, [token, navigate, fetchWishlist]);
 
   const removeFromWishlist = async (productId) => {
     try {
-      await api.delete('/wishlist/', { data: { product_id: productId } })
-      showToast('Eliminado de tu wishlist')
-      fetchWishlist()
+      await api.delete('/wishlist/', { data: { product_id: productId } });
+      showToast('Eliminado de tu wishlist');
+      fetchWishlist();
     } catch (err) {
-      console.error('Error al eliminar de wishlist:', err)
-      showToast('Error al eliminar de wishlist', 'error')
+      console.error('Error al eliminar de wishlist:', err);
+      showToast('Error al eliminar de wishlist', 'error');
     }
-  }
+  };
 
   const addToCart = async (productId) => {
     try {
-      await api.post('/cart/add/', { product_id: productId, quantity: 1 })
-      showToast('¡Agregado al carrito!')
+      await api.post('/cart/add/', { product_id: productId, quantity: 1 });
+      showToast('¡Agregado al carrito!');
     } catch (err) {
-      console.error('Error al agregar al carrito:', err)
-      showToast('Error al agregar al carrito', 'error')
+      console.error('Error al agregar al carrito:', err);
+      showToast('Error al agregar al carrito', 'error');
     }
-  }
+  };
 
-  if (loading) return <Spinner />
+  if (loading) return <Spinner />;
 
   return (
     <div className="wishlist-wrapper">
@@ -68,7 +69,7 @@ function Wishlist() {
           </div>
         ) : (
           <div className="wishlist-grid">
-            {items.map(item => (
+            {items.map((item) => (
               <div key={item.id} className="wishlist-card">
                 <img
                   src={item.image_url}
@@ -105,7 +106,7 @@ function Wishlist() {
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default Wishlist
+export default Wishlist;

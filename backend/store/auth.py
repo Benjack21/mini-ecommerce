@@ -9,9 +9,9 @@ SOLUCIÓN: Esta subclase de TokenObtainPairView sobrescribe `obtain_token`
 para inyectar el claim `is_staff` en el payload del JWT. Así el frontend
 puede saber si el usuario es admin SIN necesidad de llamar a /me/.
 """
-from rest_framework_simplejwt.views import TokenObtainPairView
-from rest_framework_simplejwt.tokens import RefreshToken
+
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from rest_framework_simplejwt.views import TokenObtainPairView
 
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
@@ -22,10 +22,11 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         token = super().get_token(user)
         # [FASE 1.1] Agregamos is_staff como claim del token.
         # El frontend lo leerá con: JSON.parse(atob(token.split('.')[1])).is_staff
-        token['is_staff'] = user.is_staff
+        token["is_staff"] = user.is_staff
         return token
 
 
 class CustomTokenObtainPairView(TokenObtainPairView):
     """Vista de login que emite tokens con el claim is_staff incluido."""
+
     serializer_class = CustomTokenObtainPairSerializer

@@ -1,32 +1,30 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import api from '../api'
-import '../styles/PaymentConfirm.css'
+import { useEffect, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import api from '../api';
+import '../styles/PaymentConfirm.css';
 
 function PaymentConfirm() {
-  const [searchParams] = useSearchParams()
-  const token = localStorage.getItem('token')
-  const navigate = useNavigate()
-  const token_ws = searchParams.get('token_ws')
+  const [searchParams] = useSearchParams();
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
+  const token_ws = searchParams.get('token_ws');
 
-  const [status, setStatus] = useState(
-    token_ws && token ? 'loading' : 'error'
-  )
+  const [status, setStatus] = useState(token_ws && token ? 'loading' : 'error');
 
   useEffect(() => {
-    if (!token_ws || !token) return
-    api.post('/payment/confirm/', { token_ws })
+    if (!token_ws || !token) return;
+    api
+      .post('/payment/confirm/', { token_ws })
       .then(() => setStatus('success'))
-      .catch(err => {
-        console.error('Error al confirmar pago:', err)
-        setStatus('error')
-      })
-  }, [token, token_ws])
+      .catch((err) => {
+        console.error('Error al confirmar pago:', err);
+        setStatus('error');
+      });
+  }, [token, token_ws]);
 
   return (
     <div className="payment-wrapper">
       <div className="payment-card">
-
         {status === 'loading' && (
           <>
             <div className="payment-spinner"></div>
@@ -55,10 +53,9 @@ function PaymentConfirm() {
             </button>
           </>
         )}
-
       </div>
     </div>
-  )
+  );
 }
 
-export default PaymentConfirm
+export default PaymentConfirm;

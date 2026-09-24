@@ -1,6 +1,36 @@
-from .auth_views import register, me
-from .cart_views import add_to_cart, get_cart, CartItemViewSet
-from .order_views import place_order, get_orders
-from .payment_views import create_payment, confirm_payment
+# [LINTERS] Re-exports de vistas para importar desde `urls.py`.
+
+from .auth_views import me, register
+from .cart_views import CartItemViewSet, add_to_cart, get_cart
+from .misc_views import (
+    analytics,
+    get_notifications,
+    groq_chat,
+    mark_notifications_read,
+    reviews,
+    wishlist,
+)
+from .order_views import get_orders, place_order
+from .payment_views import confirm_payment, create_payment
 from .product_views import CategoryViewSet, ProductViewSet, product_images
-from .misc_views import reviews, analytics, wishlist, get_notifications, mark_notifications_read, groq_chat
+
+__all__ = [
+    "CategoryViewSet",
+    "ProductViewSet",
+    "CartItemViewSet",
+    "register",
+    "add_to_cart",
+    "get_cart",
+    "me",
+    "get_orders",
+    "place_order",
+    "reviews",
+    "analytics",
+    "create_payment",
+    "confirm_payment",
+    "product_images",
+    "wishlist",
+    "get_notifications",
+    "mark_notifications_read",
+    "groq_chat",
+]

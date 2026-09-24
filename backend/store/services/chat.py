@@ -1,23 +1,21 @@
 import requests as http_requests
 from decouple import config
 
+
 def get_groq_response(messages):
     """[FASE 2.1] Lógica de comunicación con Groq API."""
     # messages ya debe venir filtrado/validado desde la view
     try:
         response = http_requests.post(
-            'https://api.groq.com/openai/v1/chat/completions',
-            headers={
-                'Authorization': f'Bearer {config("GROQ_API_KEY")}',
-                'Content-Type': 'application/json'
-            },
+            "https://api.groq.com/openai/v1/chat/completions",
+            headers={"Authorization": f'Bearer {config("GROQ_API_KEY")}', "Content-Type": "application/json"},
             json={
-                'model': 'llama-3.3-70b-versatile',
-                'messages': [
+                "model": "llama-3.3-70b-versatile",
+                "messages": [
                     {
-                        'role': 'system',
-                        'content': '''Eres un asistente de soporte de MiniShop, una tienda online chilena.
-                        
+                        "role": "system",
+                        "content": """Eres un asistente de soporte de MiniShop, una tienda online chilena.
+
 INFORMACIÓN DE LA TIENDA:
 - Vendemos productos electrónicos y ropa
 - Aceptamos pagos con Webpay (tarjetas de crédito y débito)
@@ -33,14 +31,14 @@ PREGUNTAS FRECUENTES:
 
 INSTRUCCIONES:
 - Responde siempre en español
-- Sé amable y breve'''
+- Sé amable y breve""",
                     },
-                    *messages
+                    *messages,
                 ],
-                'max_tokens': 500,
-                'temperature': 0.7
+                "max_tokens": 500,
+                "temperature": 0.7,
             },
-            timeout=15
+            timeout=15,
         )
         response.raise_for_status()
         return response.json(), None

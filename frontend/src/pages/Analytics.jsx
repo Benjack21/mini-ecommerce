@@ -1,30 +1,30 @@
-import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
-import api from '../api'
-import Spinner from '../components/Spinner'
-import '../styles/Analytics.css'
+import { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import api from '../api';
+import Spinner from '../components/Spinner';
+import '../styles/Analytics.css';
 
 function Analytics() {
-  const [data, setData] = useState(null)
-  const token = localStorage.getItem('token')
-  const navigate = useNavigate()
+  const [data, setData] = useState(null);
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!token) {
-      navigate('/login')
-      return
+      navigate('/login');
+      return;
     }
-    api.get('/analytics/')
-      .then(res => setData(res.data))
-      .catch(err => console.error(err))
-  }, [token, navigate])
+    api
+      .get('/analytics/')
+      .then((res) => setData(res.data))
+      .catch((err) => console.error(err));
+  }, [token, navigate]);
 
-  if (!data) return <Spinner />
+  if (!data) return <Spinner />;
 
   return (
     <div className="analytics-wrapper">
       <div className="analytics-container">
-
         {/* Header */}
         <div className="analytics-header">
           <button onClick={() => navigate('/admin-panel')} className="analytics-header__back">
@@ -39,8 +39,12 @@ function Analytics() {
             { label: 'Productos', value: data.total_products, icon: '📦' },
             { label: 'Usuarios', value: data.total_users, icon: '👤' },
             { label: 'Órdenes', value: data.total_orders, icon: '🧾' },
-            { label: 'Ingresos', value: `$${parseFloat(data.total_revenue).toFixed(2)}`, icon: '💰' },
-          ].map(stat => (
+            {
+              label: 'Ingresos',
+              value: `$${parseFloat(data.total_revenue).toFixed(2)}`,
+              icon: '💰',
+            },
+          ].map((stat) => (
             <div key={stat.label} className="analytics-stat-card">
               <p className="analytics-stat-card__icon">{stat.icon}</p>
               <p className="analytics-stat-card__value">{stat.value}</p>
@@ -50,7 +54,6 @@ function Analytics() {
         </div>
 
         <div className="analytics-panels">
-
           {/* Top productos */}
           <div className="analytics-panel">
             <h2 className="analytics-panel__title">🏆 Productos más vendidos</h2>
@@ -78,7 +81,7 @@ function Analytics() {
               <p className="analytics-panel__empty">Aún no hay órdenes</p>
             ) : (
               <div>
-                {data.recent_orders.map(order => (
+                {data.recent_orders.map((order) => (
                   <div key={order.id} className="analytics-row">
                     <div>
                       <p className="analytics-order__user">{order.user}</p>
@@ -90,11 +93,10 @@ function Analytics() {
               </div>
             )}
           </div>
-
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default Analytics
+export default Analytics;

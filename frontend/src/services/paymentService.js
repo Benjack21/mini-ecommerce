@@ -8,5 +8,5 @@ export const paymentService = {
   async confirmPayment(token) {
     const response = await api.post('/payment/confirm/', { token_ws: token });
     return response.data;
-  }
+  },
 };

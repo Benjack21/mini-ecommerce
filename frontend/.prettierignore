@@ -1,0 +1,4 @@
+# [LINTERS] Archivos que Prettier NO debe formatear.
+dist/
+node_modules/
+*.css

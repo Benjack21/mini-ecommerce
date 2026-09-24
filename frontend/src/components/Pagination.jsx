@@ -1,5 +1,5 @@
 function Pagination({ currentPage, totalPages, onPageChange }) {
-  if (totalPages <= 1) return null
+  if (totalPages <= 1) return null;
 
   return (
     <div className="flex justify-center items-center gap-2 mt-10">
@@ -11,7 +11,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
         ← Anterior
       </button>
 
-      {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
+      {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
         <button
           key={page}
           onClick={() => onPageChange(page)}
@@ -33,7 +33,7 @@ function Pagination({ currentPage, totalPages, onPageChange }) {
         Siguiente →
       </button>
     </div>
-  )
+  );
 }
 
-export default Pagination
+export default Pagination;

@@ -126,7 +126,7 @@
 ### 4.2 Calidad de código
 
 - Revisar imports duplicados y código muerto en `store/` (tras Fase 2).
-- Formato/consistencia: sin formatter configurado → seguir estilo del archivo vecino; no reformatear el repo entero.
+- Formato/consistencia: **Ruff + Black** (Python) y **ESLint + Prettier** (frontend) configurados y ejecutados.
 - `seed` (`management/commands/seed.py`): comprobar que sigue funcionando tras refactors.
 
 ### 4.3 Docs

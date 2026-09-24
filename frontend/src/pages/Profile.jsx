@@ -1,33 +1,36 @@
-import { useEffect, useState } from 'react'
-import { useNavigate, Link } from 'react-router-dom'
-import api from '../api'
-import '../styles/Profile.css'
+import { useEffect, useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import api from '../api';
+import '../styles/Profile.css';
 
 function Profile() {
-  const [user, setUser] = useState(null)
-  const [cartCount, setCartCount] = useState(0)
-  const token = localStorage.getItem('token')
-  const navigate = useNavigate()
+  const [user, setUser] = useState(null);
+  const [cartCount, setCartCount] = useState(0);
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
 
   useEffect(() => {
     if (!token) {
-      navigate('/login')
-      return
+      navigate('/login');
+      return;
     }
-    api.get('/me/')
-      .then(res => setUser(res.data))
-      .catch(err => console.error(err))
+    api
+      .get('/me/')
+      .then((res) => setUser(res.data))
+      .catch((err) => console.error(err));
 
-    api.get('/cart/me/')
-      .then(res => setCartCount(res.data.length))
-      .catch(err => console.error('Error al obtener carrito:', err))
-  }, [token, navigate])
+    api
+      .get('/cart/me/')
+      .then((res) => setCartCount(res.data.length))
+      .catch((err) => console.error('Error al obtener carrito:', err));
+  }, [token, navigate]);
 
-  if (!user) return (
-    <div className="profile-loading">
-      <p className="profile-loading__text">Cargando perfil...</p>
-    </div>
-  )
+  if (!user)
+    return (
+      <div className="profile-loading">
+        <p className="profile-loading__text">Cargando perfil...</p>
+      </div>
+    );
 
   return (
     <div className="profile-wrapper">
@@ -36,9 +39,7 @@ function Profile() {
 
         {/* Avatar y nombre */}
         <div className="profile-avatar-card">
-          <div className="profile-avatar">
-            {user.username.charAt(0).toUpperCase()}
-          </div>
+          <div className="profile-avatar">{user.username.charAt(0).toUpperCase()}</div>
           <h2 className="profile-avatar-card__name">{user.username}</h2>
           <span className={user.is_staff ? 'profile-badge--staff' : 'profile-badge--client'}>
             {user.is_staff ? '⚙️ Administrador' : '🛍️ Cliente'}
@@ -53,7 +54,9 @@ function Profile() {
           </div>
           <div className="profile-stat-card">
             <p className="profile-stat-card__value">{user.is_staff ? '⚙️' : '🛍️'}</p>
-            <p className="profile-stat-card__label">{user.is_staff ? 'Administrador' : 'Cliente'}</p>
+            <p className="profile-stat-card__label">
+              {user.is_staff ? 'Administrador' : 'Cliente'}
+            </p>
           </div>
         </div>
 
@@ -85,17 +88,16 @@ function Profile() {
         {/* Cerrar sesión */}
         <button
           onClick={() => {
-            localStorage.removeItem('token')
-            window.location.href = '/'
+            localStorage.removeItem('token');
+            window.location.href = '/';
           }}
           className="profile-btn-logout"
         >
           Cerrar sesión
         </button>
-
       </div>
     </div>
-  )
+  );
 }
 
-export default Profile
+export default Profile;

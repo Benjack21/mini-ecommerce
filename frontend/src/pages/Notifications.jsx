@@ -1,37 +1,39 @@
-import { useEffect, useState, useCallback } from 'react'
-import { useNavigate } from 'react-router-dom'
-import Spinner from '../components/Spinner'
-import api from '../api'
-import '../styles/Notifications.css'
+import { useEffect, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
+import Spinner from '../components/Spinner';
+import api from '../api';
+import '../styles/Notifications.css';
 
 function Notifications() {
-  const [notifications, setNotifications] = useState([])
-  const [loading, setLoading] = useState(true)
-  const token = localStorage.getItem('token')
-  const navigate = useNavigate()
+  const [notifications, setNotifications] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem('token');
+  const navigate = useNavigate();
 
   const fetchNotifications = useCallback(() => {
-    api.get('/notifications/')
-      .then(res => setNotifications(res.data))
-      .catch(err => console.error('Error al obtener notificaciones:', err))
-      .finally(() => setLoading(false))
-  }, [])
+    api
+      .get('/notifications/')
+      .then((res) => setNotifications(res.data))
+      .catch((err) => console.error('Error al obtener notificaciones:', err))
+      .finally(() => setLoading(false));
+  }, []);
 
   const markAllRead = useCallback(() => {
-    api.patch('/notifications/read/', {})
-      .catch(err => console.error('Error al marcar notificaciones:', err))
-  }, [])
+    api
+      .patch('/notifications/read/', {})
+      .catch((err) => console.error('Error al marcar notificaciones:', err));
+  }, []);
 
   useEffect(() => {
     if (!token) {
-      navigate('/login')
-      return
+      navigate('/login');
+      return;
     }
-    fetchNotifications()
-    markAllRead()
-  }, [token, navigate, fetchNotifications, markAllRead])
+    fetchNotifications();
+    markAllRead();
+  }, [token, navigate, fetchNotifications, markAllRead]);
 
-  if (loading) return <Spinner />
+  if (loading) return <Spinner />;
 
   return (
     <div className="notif-wrapper">
@@ -54,16 +56,14 @@ function Notifications() {
                   <p className="notif-item__message">{n.message}</p>
                   <span className="notif-item__date">{n.created_at}</span>
                 </div>
-                {!n.read && (
-                  <span className="notif-item__badge">Nueva</span>
-                )}
+                {!n.read && <span className="notif-item__badge">Nueva</span>}
               </div>
             ))}
           </div>
         )}
       </div>
     </div>
-  )
+  );
 }
 
-export default Notifications
+export default Notifications;

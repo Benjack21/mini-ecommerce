@@ -22,10 +22,10 @@ export const productService = {
     return response.data;
   },
   async getImages(productId) {
-    // Las imágenes vienen anidadas en el ProductSerializer, 
+    // Las imágenes vienen anidadas en el ProductSerializer,
     // pero si hay un endpoint específico se añade aquí.
     // Actualmente el backend las maneja en /api/products/<id>/images/
     const response = await api.get(`/products/${productId}/images/`);
     return response.data;
-  }
+  },
 };
