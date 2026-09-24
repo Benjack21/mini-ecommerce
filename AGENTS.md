@@ -15,6 +15,7 @@ Instrucciones para agentes que trabajen en este repo. Solo hechos no obvios.
   - Entrada: `frontend/src/main.jsx` → `App.jsx`.
   - HTTP centralizado en `frontend/src/api.js`; exporta `saveSession()`, `clearSession()`, `isAuthenticated()`.
   - Capa de servicios en `frontend/src/services/` para llamadas a la API.
+  - Helpers puros en `frontend/src/utils/` (`rut.js`: `formatRut()` progresivo al teclear y `isValidRut()` con módulo 11; el backend debe mantener la misma lógica en `views/auth_views.py`).
   - Lógica de estado y fetching en `frontend/src/hooks/` (`useAuth`, `useCart`, etc.).
  
 ## Comandos (Windows / PowerShell)
@@ -109,6 +110,7 @@ Endpoints de auth. **Los `token/` viven en `backend/backend/urls.py`** (no en `s
   - **No existe `POST /api/login/`** (eliminado): duplicaba semántica 400 vs 401 y emitía tokens **sin** `is_staff`.
 - `POST /api/token/refresh/` — `{"refresh": "..."}` → `{"access": "..."}` (SimpleJWT estándar, sin claim custom).
 - `POST /api/register/` — obligatorios `email, password, first_name, last_name, rut, phone`; `birth_date` opcional (vacío → `None`; un `''` directo a `DateField` daba 500); solo `@gmail.com`; email y RUT únicos. 201 `{"message"}` / 400 `{"error": "<string>"}`.
+  - **RUT:** `_normalize_rut()` (en `views/auth_views.py`) limpia y guarda **siempre** formateado `11.111.111-1`; valida estructura (7-8 dígitos) y **DV módulo 11** (`_rut_dv_is_valid()`). Inválido → 400 `{"error": "RUT inválido..."}`. La unicidad se compara sobre la forma formateada → `12345678-5` y `12.345.678-5` chocan. El frontend replica la lógica en `utils/rut.js` (input de `Register.jsx` formatea al teclear).
 - `GET /api/me/` — **exige autenticación** (`@authentication_classes([JWTAuthentication, SessionAuthentication])` + `@permission_classes([IsAuthenticated])`) → **401** si no. Devuelve `email, username, is_staff, first_name, last_name, rut, phone, birth_date`. Lo consume `useAuth`/`Profile`.
 
 **Formato de error de auth:** el cuerpo es **siempre** `{"error": "<string>"}` (nunca listas). `as_serializer_error()` de DRF convertiría los valores en listas → `CustomTokenObtainPairView.post()` los normaliza con `_error_message()`.
@@ -130,7 +132,7 @@ Endpoints de auth. **Los `token/` viven en `backend/backend/urls.py`** (no en `s
 - Solo `backend/store/tests.py` (Django `TestCase` + DRF `APIClient`). Sin tests de frontend.
 - La BD de tests es SQLite temporal; no requiere servicios externos.
 - Añadir tests de permisos/IDOR al tocar views protegidas.
-- 44 tests en verde. `AuthAPITestCase` cubre `/api/token/` (200/400/401 + claim `is_staff`) y `/api/me/` (401 sin token).
+- 52 tests en verde. `AuthAPITestCase` cubre `/api/token/` (200/400/401 + claim `is_staff`), `/api/me/` (401 sin token), el formato estricto de email en `/api/register/` (regex `^[^@\s]+@gmail\.com$`: un solo `@`, sin espacios, con parte local) y RUT (normalización a `11.111.111-1`, DV módulo 11, unicidad entre formatos).
 - **Ojo con `User.email` (unique):** usuarios creados con `create_user()` sin email o con el mismo email chocan con `UNIQUE constraint failed: store_user.email` y truena el `setUp` de toda la clase. Siempre email único por usuario.
 
 ## Proxy de dev (Vite)

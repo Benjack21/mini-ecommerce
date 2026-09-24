@@ -89,7 +89,7 @@ class AuthAPITestCase(TestCase):
             "password": "newpass123",
             "first_name": "New",
             "last_name": "User",
-            "rut": "12345678-9",
+            "rut": "12.345.678-5",
             "phone": "912345678",
             "birth_date": "2000-01-01",
         }
@@ -116,6 +116,27 @@ class AuthAPITestCase(TestCase):
         response = self.client.post("/api/register/", self._payload(email="user@hotmail.com"))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def test_register_email_without_local_part(self):
+        """[FIX] '@gmail.com' sin parte local no debe crear cuenta."""
+        response = self.client.post("/api/register/", self._payload(email="@gmail.com"))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_email_double_at(self):
+        """[FIX] 'a@b@gmail.com' tiene dos @: inválido."""
+        response = self.client.post("/api/register/", self._payload(email="a@b@gmail.com"))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_email_with_spaces(self):
+        """[FIX] Espacios dentro del correo: inválido."""
+        response = self.client.post("/api/register/", self._payload(email="a b@gmail.com"))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_email_uppercase_normalized(self):
+        """[FIX] Se normaliza a minúsculas antes de validar/almacenar."""
+        response = self.client.post("/api/register/", self._payload(email="NEWUSER@GMAIL.COM"))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(User.objects.filter(email="newuser@gmail.com").exists())
+
     def test_register_missing_fields(self):
         response = self.client.post("/api/register/", self._payload(phone=""))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
@@ -125,7 +146,7 @@ class AuthAPITestCase(TestCase):
         self.client.post("/api/register/", self._payload())
         response = self.client.post(
             "/api/register/",
-            self._payload(rut="98765432-1", phone="987654321"),
+            self._payload(rut="98.765.432-5", phone="987654321"),
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
@@ -134,6 +155,32 @@ class AuthAPITestCase(TestCase):
         response = self.client.post(
             "/api/register/",
             self._payload(email="otro@gmail.com"),
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_rut_unformatted_normalized(self):
+        """[FIX] Llega sin puntos '12345678-5' y se guarda como '12.345.678-5'."""
+        response = self.client.post("/api/register/", self._payload(rut="12345678-5"))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = User.objects.get(email="newuser@gmail.com")
+        self.assertEqual(user.profile.rut, "12.345.678-5")
+
+    def test_register_rut_invalid_dv(self):
+        """[FIX] DV erróneo (módulo 11): 12.345.678-9 debe rechazarse."""
+        response = self.client.post("/api/register/", self._payload(rut="12.345.678-9"))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_rut_malformed(self):
+        """[FIX] RUT demasiado corto / no numérico: 400, no 500."""
+        response = self.client.post("/api/register/", self._payload(rut="12345"))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_rut_duplicate_across_formats(self):
+        """[FIX] Mismo RUT con y sin puntos debe chocar en la unicidad."""
+        self.client.post("/api/register/", self._payload())
+        response = self.client.post(
+            "/api/register/",
+            self._payload(email="otro@gmail.com", rut="12345678-5"),
         )
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 

@@ -1,3 +1,4 @@
+import re
 from datetime import date
 
 from django.db import IntegrityError, transaction
@@ -13,6 +14,38 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from store.models import User, UserProfile
+
+# [FIX] Email estricto: parte local no vacía, un solo @, sin espacios,
+# terminando en @gmail.com. Cubre "@gmail.com", "a@b@gmail.com" y "a b@gmail.com".
+GMAIL_EMAIL_RE = re.compile(r"^[^@\s]+@gmail\.com$")
+
+# [FIX] RUT canónico: cuerpo de 7 u 8 dígitos con puntos + DV (0-9 o K).
+RUT_FORMAT_RE = re.compile(r"^\d{1,2}(?:\.\d{3}){2}-[\dKk]$")
+
+
+def _rut_dv_is_valid(body, dv):
+    """Dígito verificador chileno (módulo 11)."""
+    total = 0
+    multiplier = 2
+    for digit in reversed(body):
+        total += int(digit) * multiplier
+        multiplier = 2 if multiplier == 7 else multiplier + 1
+    rest = 11 - (total % 11)
+    expected = "0" if rest == 11 else "K" if rest == 10 else str(rest)
+    return dv == expected
+
+
+def _normalize_rut(value):
+    """[FIX] Devuelve el RUT en formato NN.NNN.NNN-DV o None si es inválido."""
+    clean = re.sub(r"[^0-9kK]", "", value or "").upper()
+    if len(clean) < 3:
+        return None
+    body, dv = clean[:-1], clean[-1]
+    body_formatted = re.sub(r"\B(?=(\d{3})+(?!\d))", ".", body)
+    formatted = f"{body_formatted}-{dv}"
+    if not RUT_FORMAT_RE.match(formatted):
+        return None
+    return formatted if _rut_dv_is_valid(body, dv) else None
 
 
 def _profile_payload(user):
@@ -53,14 +86,24 @@ def register(request):
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # 2. Validación de dominio Gmail
-    if not email.endswith("@gmail.com"):
+    # 2. Validación de formato y dominio Gmail
+    if not GMAIL_EMAIL_RE.match(email):
         return Response(
-            {"error": "Solo se permiten correos de @gmail.com"},
+            {"error": "Correo inválido: debe tener un solo @ y terminar en @gmail.com"},
             status=status.HTTP_400_BAD_REQUEST,
         )
 
-    # 3. Validación de formato de fecha (no exponer excepciones como 500)
+    # 3. [FIX] Normalización y validación de RUT (formato NN.NNN.NNN-DV + módulo 11).
+    # Se guarda siempre formateado para que la unicidad detecte el mismo RUT
+    # aunque llegue "12345678-5" o "12.345.678-5".
+    rut = _normalize_rut(rut)
+    if rut is None:
+        return Response(
+            {"error": "RUT inválido: revisa el formato o el dígito verificador"},
+            status=status.HTTP_400_BAD_REQUEST,
+        )
+
+    # 4. Validación de formato de fecha (no exponer excepciones como 500)
     if birth_date is not None:
         try:
             date.fromisoformat(birth_date)
@@ -70,7 +113,7 @@ def register(request):
                 status=status.HTTP_400_BAD_REQUEST,
             )
 
-    # 4. Validación de unicidad
+    # 5. Validación de unicidad
     if User.objects.filter(email=email).exists():
         return Response(
             {"error": "El correo electrónico ya está registrado"},

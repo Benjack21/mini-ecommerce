@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { authService } from '../services/authService';
+import { formatRut, isValidRut } from '../utils/rut';
 import '../styles/Login.css';
 
 function Register() {
@@ -21,13 +22,26 @@ function Register() {
     e.preventDefault();
     setError('');
 
-    if (!form.first_name || !form.last_name || !form.rut || !form.phone || !form.email || !form.password) {
+    if (
+      !form.first_name ||
+      !form.last_name ||
+      !form.rut ||
+      !form.phone ||
+      !form.email ||
+      !form.password
+    ) {
       setError('Todos los campos obligatorios deben estar llenos');
       return;
     }
 
-    if (!(form.email || '').toLowerCase().endsWith('@gmail.com')) {
-      setError('El correo electrónico debe ser de @gmail.com');
+    const email = (form.email || '').trim().toLowerCase();
+    if (!/^[^@\s]+@gmail\.com$/.test(email)) {
+      setError('Correo inválido: debe tener un solo @ y terminar en @gmail.com');
+      return;
+    }
+
+    if (!isValidRut(form.rut)) {
+      setError('RUT inválido: revisa el formato o el dígito verificador');
       return;
     }
 
@@ -70,7 +84,7 @@ function Register() {
             className="login-form__input"
             placeholder="RUT"
             value={form.rut}
-            onChange={(e) => setForm({ ...form, rut: e.target.value })}
+            onChange={(e) => setForm({ ...form, rut: formatRut(e.target.value) })}
           />
           <input
             className="login-form__input"
