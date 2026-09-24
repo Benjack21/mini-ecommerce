@@ -1,5 +1,36 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+
+class User(AbstractUser):
+    """
+    Modelo de Usuario Simplificado.
+    El email es la única identidad. Se elimina el campo username para evitar ambigüedades.
+    """
+
+    email = models.EmailField(unique=True)
+
+    USERNAME_FIELD = "username"
+    REQUIRED_FIELDS = ["email"]
+
+    def __str__(self):
+        return self.email
+
+
+class UserProfile(models.Model):
+    """
+    Perfil extendido para almacenar datos personales e inmutables.
+    """
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="profile")
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    rut = models.CharField(max_length=12, unique=True)
+    phone = models.CharField(max_length=20)
+    birth_date = models.DateField(null=True, blank=True)
+
+    def __str__(self):
+        return f"Perfil de {self.user.email}"
 
 
 class Category(models.Model):
@@ -27,7 +58,7 @@ class CartItem(models.Model):
     quantity = models.IntegerField(default=1)
 
     def __str__(self):
-        return f"{self.user.username} - {self.product.name}"
+        return f"{self.user.email} - {self.product.name}"
 
 
 class Order(models.Model):
@@ -36,7 +67,7 @@ class Order(models.Model):
     total = models.DecimalField(max_digits=10, decimal_places=2)
 
     def __str__(self):
-        return f"Orden #{self.id} - {self.user.username}"
+        return f"Orden #{self.id} - {self.user.email}"
 
 
 class OrderItem(models.Model):
@@ -60,7 +91,7 @@ class Review(models.Model):
         unique_together = ("user", "product")
 
     def __str__(self):
-        return f"{self.user.username} - {self.product.name} ({self.rating}⭐)"
+        return f"{self.user.email} - {self.product.name} ({self.rating}⭐)"
 
 
 class ProductImage(models.Model):
@@ -79,7 +110,7 @@ class Wishlist(models.Model):
         unique_together = ("user", "product")
 
     def __str__(self):
-        return f"{self.user.username} - {self.product.name}"
+        return f"{self.user.email} - {self.product.name}"
 
 
 class Notification(models.Model):
@@ -89,4 +120,4 @@ class Notification(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
-        return f"{self.user.username} - {self.message[:30]}"
+        return f"{self.user.email} - {self.message[:30]}"

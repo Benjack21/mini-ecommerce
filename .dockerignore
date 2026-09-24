@@ -1,0 +1,10 @@
+# Contexto de build de Dockerfile.backend (contexto = raíz del repo).
+# Sin esto `COPY` arrastraba venv/, node_modules/ y .git al build context.
+.git
+.ruff_cache
+**/__pycache__
+**/*.pyc
+dist
+venv
+backend/venv
+frontend/node_modules

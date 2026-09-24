@@ -1,21 +1,32 @@
 import { useState } from 'react';
-import api from '../api';
 import { Link, useNavigate } from 'react-router-dom';
+import { authService } from '../services/authService';
 import '../styles/Login.css';
 
 function Login() {
-  const [form, setForm] = useState({ username: '', password: '' });
+  const [form, setForm] = useState({ email: '', password: '' });
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+
+    if (!form.email || !form.password) {
+      setError('El correo y la contraseña son requeridos');
+      return;
+    }
+
+    setLoading(true);
     try {
-      const res = await api.post('/token/', form);
-      localStorage.setItem('token', res.data.access);
+      await authService.login(form);
       navigate('/');
-    } catch {
-      setError('Usuario o contraseña incorrectos');
+    } catch (err) {
+      // api.js NO redirige en 401 de /token/, así que el mensaje se ve.
+      setError(err.response?.data?.error || 'Correo o contraseña incorrectos');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -29,22 +40,25 @@ function Login() {
 
         {error && <div className="login-error">{error}</div>}
 
-        <div className="login-form">
+        <form onSubmit={handleSubmit} className="login-form">
           <input
             className="login-form__input"
-            placeholder="Usuario"
-            onChange={(e) => setForm({ ...form, username: e.target.value })}
+            type="email"
+            placeholder="Correo electrónico"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
           />
           <input
             className="login-form__input"
             type="password"
             placeholder="Contraseña"
+            value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
           />
-          <button onClick={handleSubmit} className="login-form__btn">
-            Entrar
+          <button type="submit" disabled={loading} className="login-form__btn">
+            {loading ? 'Entrando…' : 'Entrar'}
           </button>
-        </div>
+        </form>
 
         <p className="login-footer">
           ¿No tienes cuenta?{' '}

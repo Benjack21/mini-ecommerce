@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import api from '../api';
+import api, { clearSession } from '../api';
+import { authService } from '../services/authService';
 
 function Navbar() {
   const token = localStorage.getItem('token');
@@ -13,16 +14,15 @@ function Navbar() {
   useEffect(() => {
     if (!token) return;
 
-    api
-      .get('/me/')
-      .then((res) => setIsAdmin(res.data.is_staff))
+    authService
+      .getMe()
+      .then((me) => setIsAdmin(Boolean(me.is_staff)))
       .catch(() => setIsAdmin(false));
 
     api
       .get('/cart/me/')
       .then((res) => setCartCount(res.data.length))
       .catch(() => setCartCount(0));
-
     api
       .get('/notifications/')
       .then((res) => {
@@ -107,7 +107,7 @@ function Navbar() {
           {token && (
             <button
               onClick={() => {
-                localStorage.removeItem('token');
+                clearSession();
                 window.location.reload();
               }}
               className="text-sm text-gray-400 hover:text-red-400 transition-colors"
@@ -198,7 +198,7 @@ function Navbar() {
           {token && (
             <button
               onClick={() => {
-                localStorage.removeItem('token');
+                clearSession();
                 window.location.reload();
               }}
               className="text-red-400 text-sm text-left"

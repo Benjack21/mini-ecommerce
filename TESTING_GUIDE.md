@@ -3,10 +3,13 @@
 Este documento contiene las credenciales y tarjetas de prueba proporcionadas por Transbank para validar el flujo de pagos en el ambiente de integración (TEST).
 
 ## 🔑 Autenticación de Usuario
-Cuando el simulador de Webpay solicite autenticación mediante RUT y clave, utiliza los siguientes datos:
+
+Cuando el **simulador de Webpay** pida RUT y clave, utiliza los siguientes datos (son del portal de Transbank, **no** de tu cuenta en la tienda):
 
 - **RUT:** `11.111.111-1`
 - **Clave:** `123`
+
+Para llegar al botón de pago primero necesitas sesión en la app: registra una cuenta con correo `@gmail.com` (el backend solo acepta ese dominio) o entra con un admin si conoces su contraseña.
 
 ## 💳 Tarjetas de Prueba
 
@@ -23,7 +26,9 @@ Cuando el simulador de Webpay solicite autenticación mediante RUT y clave, util
 
 ## 🚀 Flujo de Verificación
 
-1. Iniciar sesión en la aplicación.
+> Requiere `TBK_INTEGRATION_TYPE=TEST` en el `.env` (es el valor por defecto). Ver `GET_STARTED.md` para arrancar el stack.
+
+1. Iniciar sesión en la aplicación (o registrarse con correo `@gmail.com`).
 2. Agregar productos al carrito.
 3. Hacer clic en el botón de **Pagar**.
 4. Ser redirigido al portal de pruebas de Transbank.

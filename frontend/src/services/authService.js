@@ -1,8 +1,10 @@
-import api from '../api';
+import api, { saveSession } from '../api';
 
 export const authService = {
   async login(credentials) {
     const response = await api.post('/token/', credentials);
+    // Guarda access + refresh (los usa api.js para auto-refrescar el JWT).
+    saveSession(response.data);
     return response.data;
   },
   async register(userData) {

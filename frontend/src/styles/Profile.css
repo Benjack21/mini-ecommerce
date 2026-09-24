@@ -30,6 +30,9 @@
   .profile-avatar-card__name {
     @apply text-xl font-bold text-gray-900 mb-1;
   }
+  .profile-avatar-card__email {
+    @apply text-sm text-gray-500 mb-2;
+  }
   .profile-badge--staff {
     @apply text-xs px-3 py-1 rounded-full font-medium bg-yellow-50 text-yellow-600;
   }

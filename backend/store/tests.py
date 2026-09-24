@@ -1,10 +1,13 @@
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.test import TestCase
 from rest_framework import status
 from rest_framework.test import APIClient
+from rest_framework_simplejwt.tokens import AccessToken
 
 from .models import CartItem, Category, Product
 from .services import cart_service, orders_service
+
+User = get_user_model()
 
 
 class CategoryTestCase(TestCase):
@@ -60,7 +63,7 @@ class ProductAPITestCase(TestCase):
 
     def test_create_product_requires_staff(self):
         """[FASE 4.1] Permisos: No staff no crea productos."""
-        user = User.objects.create_user(username="customer", password="password")
+        user = User.objects.create_user(username="customer", password="password", email="customer@example.com")
         self.client.force_authenticate(user=user)
         response = self.client.post(
             "/api/products/", {"name": "Hacker Product", "price": 10, "category": self.category.id}
@@ -69,32 +72,144 @@ class ProductAPITestCase(TestCase):
 
 
 class AuthAPITestCase(TestCase):
+    """[FASE 5.x] Registro y login por los endpoints que USA el frontend."""
+
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username="testuser", password="testpass123")
+        self.user = User.objects.create_user(
+            username="testuser@example.com",
+            email="testuser@example.com",
+            password="testpass123",
+        )
+
+    @staticmethod
+    def _payload(**overrides):
+        payload = {
+            "email": "newuser@gmail.com",
+            "password": "newpass123",
+            "first_name": "New",
+            "last_name": "User",
+            "rut": "12345678-9",
+            "phone": "912345678",
+            "birth_date": "2000-01-01",
+        }
+        payload.update(overrides)
+        return payload
 
     def test_register(self):
-        response = self.client.post("/api/register/", {"username": "newuser", "password": "newpass123"})
+        response = self.client.post("/api/register/", self._payload())
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertTrue(User.objects.filter(email="newuser@gmail.com").exists())
 
-    def test_register_duplicate_user(self):
-        response = self.client.post("/api/register/", {"username": "testuser", "password": "testpass123"})
+    def test_register_without_birth_date(self):
+        """[FIX] El input date vacío viaja como '' y antes reventaba con 500."""
+        response = self.client.post("/api/register/", self._payload(birth_date=""))
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        user = User.objects.get(email="newuser@gmail.com")
+        self.assertIsNone(user.profile.birth_date)
+
+    def test_register_invalid_birth_date(self):
+        response = self.client.post("/api/register/", self._payload(birth_date="no-es-fecha"))
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_login(self):
-        response = self.client.post("/api/token/", {"username": "testuser", "password": "testpass123"})
+    def test_register_requires_gmail(self):
+        response = self.client.post("/api/register/", self._payload(email="user@hotmail.com"))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_missing_fields(self):
+        response = self.client.post("/api/register/", self._payload(phone=""))
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_duplicate_email(self):
+        """Unicidad real: mismo correo @gmail.com ya registrado."""
+        self.client.post("/api/register/", self._payload())
+        response = self.client.post(
+            "/api/register/",
+            self._payload(rut="98765432-1", phone="987654321"),
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_register_duplicate_rut(self):
+        self.client.post("/api/register/", self._payload())
+        response = self.client.post(
+            "/api/register/",
+            self._payload(email="otro@gmail.com"),
+        )
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_login_with_email(self):
+        response = self.client.post("/api/token/", {"email": "testuser@example.com", "password": "testpass123"})
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertIn("access", response.data)
+        self.assertIn("refresh", response.data)
+        self.assertIs(AccessToken(response.data["access"])["is_staff"], False)
+
+    def test_login_with_username(self):
+        response = self.client.post("/api/token/", {"username": "testuser@example.com", "password": "testpass123"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_login_is_staff_claim(self):
+        """PrivateRoute adminOnly lee payload.is_staff del access token."""
+        User.objects.filter(pk=self.user.pk).update(is_staff=True)
+        response = self.client.post("/api/token/", {"email": "testuser@example.com", "password": "testpass123"})
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertIs(AccessToken(response.data["access"])["is_staff"], True)
 
     def test_login_wrong_password(self):
-        response = self.client.post("/api/token/", {"username": "testuser", "password": "wrongpass"})
+        response = self.client.post("/api/token/", {"email": "testuser@example.com", "password": "wrongpass"})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+        # [FIX] DRF convertía el valor a lista; /register/ responde string.
+        self.assertIsInstance(response.data["error"], str)
+
+    def test_login_unknown_email(self):
+        response = self.client.post("/api/token/", {"email": "nadien@gmail.com", "password": "x"})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_login_missing_fields(self):
+        response = self.client.post("/api/token/", {"password": "testpass123"})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIsInstance(response.data["error"], str)
+
+    def test_login_empty_payload(self):
+        """[FIX] {} debe responder {"error": ...}, no el detalle de campo de DRF."""
+        response = self.client.post("/api/token/", {})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIsInstance(response.data["error"], str)
+        self.assertNotIn("password", response.data)
+
+    def test_login_blank_password(self):
+        response = self.client.post("/api/token/", {"email": "testuser@example.com", "password": ""})
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self.assertIsInstance(response.data["error"], str)
+
+    def test_login_rejects_inactive_user(self):
+        User.objects.filter(pk=self.user.pk).update(is_active=False)
+        response = self.client.post("/api/token/", {"email": "testuser@example.com", "password": "testpass123"})
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_me_requires_auth(self):
+        """[FIX] /api/me/ no tenía permission_classes y devolvía 200 al anónimo."""
+        response = self.client.get("/api/me/")
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def test_me_returns_profile(self):
+        response = self.client.post("/api/token/", {"email": "testuser@example.com", "password": "testpass123"})
+        self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {response.data['access']}")
+        me = self.client.get("/api/me/")
+        self.assertEqual(me.status_code, status.HTTP_200_OK)
+        self.assertEqual(me.data["email"], "testuser@example.com")
+        self.assertIn("is_staff", me.data)
+
+    def test_me_with_expired_token_is_401(self):
+        self.client.credentials(HTTP_AUTHORIZATION="Bearer token-falso")
+        response = self.client.get("/api/me/")
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
 
 
 class CartAPITestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username="testuser", password="testpass123")
+        self.user = User.objects.create_user(username="testuser", password="testpass123", email="testuser@example.com")
         self.category = Category.objects.create(name="Electrónica")
         self.product = Product.objects.create(
             name="Audífonos", description="Audífonos Bluetooth", price=29990, stock=15, category=self.category
@@ -120,7 +235,7 @@ class CartAPITestCase(TestCase):
 
     def test_cart_idor_protection(self):
         """[FASE 4.1] IDOR: Usuario A no ve carrito de Usuario B."""
-        user_b = User.objects.create_user(username="userb", password="password")
+        user_b = User.objects.create_user(username="userb", password="password", email="userb@example.com")
         CartItem.objects.create(user=user_b, product=self.product, quantity=1)
 
         # Usuario A intenta ver carrito (el endpoint /me/ ya filtra, pero verificamos)
@@ -138,7 +253,7 @@ class CartAPITestCase(TestCase):
 class WishlistAPITestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username="testuser", password="testpass123")
+        self.user = User.objects.create_user(username="testuser", password="testpass123", email="testuser@example.com")
         self.category = Category.objects.create(name="Electrónica")
         self.product = Product.objects.create(
             name="Audífonos", description="Audífonos Bluetooth", price=29990, stock=15, category=self.category
@@ -166,7 +281,7 @@ class WishlistAPITestCase(TestCase):
 class ReviewAPITestCase(TestCase):
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username="testuser", password="testpass123")
+        self.user = User.objects.create_user(username="testuser", password="testpass123", email="testuser@example.com")
         self.category = Category.objects.create(name="Electrónica")
         self.product = Product.objects.create(
             name="Audífonos", description="Audífonos Bluetooth", price=29990, stock=15, category=self.category
@@ -197,7 +312,7 @@ class ServiceUnitTests(TestCase):
     """[FASE 2.4] Tests unitarios de services sin HTTP."""
 
     def setUp(self):
-        self.user = User.objects.create_user(username="serviceuser", password="password")
+        self.user = User.objects.create_user(username="serviceuser", password="password", email="service@example.com")
         self.category = Category.objects.create(name="TestCat")
         self.product = Product.objects.create(
             name="TestProd", description="Desc", price=1000, stock=10, category=self.category
@@ -240,7 +355,7 @@ class ChatAPITestCase(TestCase):
 
     def setUp(self):
         self.client = APIClient()
-        self.user = User.objects.create_user(username="chatuser", password="password")
+        self.user = User.objects.create_user(username="chatuser", password="password", email="chat@example.com")
         self.token = "mock-token"  # No usamos el token real para evitar llamadas externas en tests
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.token}")
         self.client.force_authenticate(user=self.user)

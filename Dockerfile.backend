@@ -8,9 +8,16 @@ ENV PYTHONUNBUFFERED=1
 COPY requirements.txt .
 
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt
+    pip install -r requirements.txt --no-cache-dir
 
+# [FIX] Con `COPY . .` el paquete quedaba en /app/backend/backend/ y gunicorn
+# fallaba con "No module named 'backend.wsgi'" (exit 3). Copiando SOLO
+# backend/ la estructura en /app es /app/backend/wsgi.py + /app/store/.
 COPY backend/ .
+
+# .env vive en backend/backend/.env y llega aquí con el COPY anterior;
+# python-decouple lo lee desde el cwd (/app).
+ENV PYTHONPATH=/app
 
 EXPOSE 8000
 

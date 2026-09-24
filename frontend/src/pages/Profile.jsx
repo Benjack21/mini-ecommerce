@@ -1,36 +1,44 @@
 import { useEffect, useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import api from '../api';
+import { cartService } from '../services/cartService';
+import { clearSession } from '../api';
+import { useAuth } from '../hooks/useAuth';
 import '../styles/Profile.css';
 
 function Profile() {
-  const [user, setUser] = useState(null);
   const [cartCount, setCartCount] = useState(0);
   const token = localStorage.getItem('token');
   const navigate = useNavigate();
+  // [FIX] Antes leía user.username: /api/me/ no lo devuelve y
+  // user.username.charAt(0) lanzaba TypeError desmontando toda la app
+  // (no hay ErrorBoundary en main.jsx).
+  const { user, loading } = useAuth();
 
   useEffect(() => {
     if (!token) {
       navigate('/login');
       return;
     }
-    api
-      .get('/me/')
-      .then((res) => setUser(res.data))
-      .catch((err) => console.error(err));
 
-    api
-      .get('/cart/me/')
-      .then((res) => setCartCount(res.data.length))
-      .catch((err) => console.error('Error al obtener carrito:', err));
+    cartService
+      .getCart()
+      .then((items) => setCartCount(Array.isArray(items) ? items.length : 0))
+      .catch(() => setCartCount(0));
   }, [token, navigate]);
 
-  if (!user)
+  if (!token) return null;
+
+  if (loading || !user) {
     return (
       <div className="profile-loading">
         <p className="profile-loading__text">Cargando perfil...</p>
       </div>
     );
+  }
+
+  const fullName = [user.first_name, user.last_name].filter(Boolean).join(' ');
+  const displayName = fullName || user.email || 'Mi cuenta';
+  const initial = (user.first_name || user.email || '?').charAt(0).toUpperCase();
 
   return (
     <div className="profile-wrapper">
@@ -39,8 +47,9 @@ function Profile() {
 
         {/* Avatar y nombre */}
         <div className="profile-avatar-card">
-          <div className="profile-avatar">{user.username.charAt(0).toUpperCase()}</div>
-          <h2 className="profile-avatar-card__name">{user.username}</h2>
+          <div className="profile-avatar">{initial}</div>
+          <h2 className="profile-avatar-card__name">{displayName}</h2>
+          {user.email && <p className="profile-avatar-card__email">{user.email}</p>}
           <span className={user.is_staff ? 'profile-badge--staff' : 'profile-badge--client'}>
             {user.is_staff ? '⚙️ Administrador' : '🛍️ Cliente'}
           </span>
@@ -88,7 +97,7 @@ function Profile() {
         {/* Cerrar sesión */}
         <button
           onClick={() => {
-            localStorage.removeItem('token');
+            clearSession();
             window.location.href = '/';
           }}
           className="profile-btn-logout"
